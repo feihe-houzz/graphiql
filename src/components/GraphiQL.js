@@ -292,7 +292,7 @@ export class GraphiQL extends React.Component {
 
     return (
       <div className="graphiql-container">
-        <ThriftConverter show={this.state.thriftDiagOpen} onClose={() => this.setState({ thriftDiagOpen: false })}/>
+        <ThriftConverter show={this.state.thriftDiagOpen} onClose={() => this.setState({ thriftDiagOpen: false })} />
         <div className="historyPaneWrap" style={historyPaneStyle}>
           <QueryHistory
             operationName={this.state.operationName}

@@ -101,8 +101,8 @@ export class ThriftConverter extends React.Component {
         }
 
         this.setState({
-           graphOutput: graphOutput,
-           copied: false
+            graphOutput: graphOutput,
+            copied: false
         });
     }
 
