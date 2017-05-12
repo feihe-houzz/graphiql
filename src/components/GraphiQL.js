@@ -16,6 +16,7 @@ import {
   print,
 } from 'graphql';
 
+import { ThriftConverter } from './ThriftConverter';
 import { ExecuteButton } from './ExecuteButton';
 import { ToolbarButton } from './ToolbarButton';
 import { ToolbarGroup } from './ToolbarGroup';
@@ -119,6 +120,8 @@ export class GraphiQL extends React.Component {
         (this._storage.get('docExplorerOpen') === 'true') || false,
       historyPaneOpen:
           (this._storage.get('historyPaneOpen') === 'true') || false,
+      thriftDiagOpen:
+          (this._storage.get('thriftDiagOpen') === 'true') || false,
       docExplorerWidth: Number(this._storage.get('docExplorerWidth')) || 350,
       isWaitingForResponse: false,
       subscription: null,
@@ -252,6 +255,11 @@ export class GraphiQL extends React.Component {
           title="Show History"
           label="History"
         />
+        <ToolbarButton
+          onClick={this.handleToggleThrift}
+          title="Thrift to GraphQL converter"
+          label="Thrift"
+        />
 
       </GraphiQL.Toolbar>;
 
@@ -280,8 +288,11 @@ export class GraphiQL extends React.Component {
       height: variableOpen ? this.state.variableEditorHeight : null
     };
 
+    const code = "query { abc: 'dd'}";
+
     return (
       <div className="graphiql-container">
+        <ThriftConverter show={this.state.thriftDiagOpen} onClose={() => this.setState({ thriftDiagOpen: false })}/>
         <div className="historyPaneWrap" style={historyPaneStyle}>
           <QueryHistory
             operationName={this.state.operationName}
@@ -765,6 +776,13 @@ export class GraphiQL extends React.Component {
       this.props.onToggleHistory(!this.state.historyPaneOpen);
     }
     this.setState({ historyPaneOpen: !this.state.historyPaneOpen });
+  }
+
+  handleToggleThrift = () => {
+    if (typeof this.props.onToggleHistory === 'function') {
+      this.props.onToggleHistory(!this.state.historyPaneOpen);
+    }
+    this.setState({ thriftDiagOpen: !this.state.thriftDiagOpen });
   }
 
   handleResizeStart = downEvent => {
