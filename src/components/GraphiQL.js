@@ -16,6 +16,7 @@ import {
   print,
 } from 'graphql';
 
+import { Mobile } from './Mobile';
 import { ThriftConverter } from './ThriftConverter';
 import { ExecuteButton } from './ExecuteButton';
 import { ToolbarButton } from './ToolbarButton';
@@ -122,6 +123,9 @@ export class GraphiQL extends React.Component {
           (this._storage.get('historyPaneOpen') === 'true') || false,
       thriftDiagOpen:
           (this._storage.get('thriftDiagOpen') === 'true') || false,
+      mobileDiagOpen:
+          (this._storage.get('mobileDiagOpen') === 'true') || false,
+      mobileMode: false,
       docExplorerWidth: Number(this._storage.get('docExplorerWidth')) || 350,
       isWaitingForResponse: false,
       subscription: null,
@@ -260,6 +264,12 @@ export class GraphiQL extends React.Component {
           title="Thrift to GraphQL converter"
           label="Thrift"
         />
+        <ToolbarButton
+          onClick={this.handleToggleMobile}
+          title="Mobile mode"
+          label="Mobile"
+          highlighted={this.state.mobileMode}
+        />
 
       </GraphiQL.Toolbar>;
 
@@ -293,6 +303,8 @@ export class GraphiQL extends React.Component {
     return (
       <div className="graphiql-container">
         <ThriftConverter show={this.state.thriftDiagOpen} onClose={() => this.setState({ thriftDiagOpen: false })} />
+        <Mobile show={this.state.mobileDiagOpen} onClose={() => this.setState({ mobileDiagOpen: false })}
+            mobileActivateFn={this.handleMobileActivateFn}/>
         <div className="historyPaneWrap" style={historyPaneStyle}>
           <QueryHistory
             operationName={this.state.operationName}
@@ -779,10 +791,18 @@ export class GraphiQL extends React.Component {
   }
 
   handleToggleThrift = () => {
-    if (typeof this.props.onToggleHistory === 'function') {
-      this.props.onToggleHistory(!this.state.historyPaneOpen);
-    }
     this.setState({ thriftDiagOpen: !this.state.thriftDiagOpen });
+  }
+
+  handleToggleMobile = () => {
+    this.setState({ mobileDiagOpen: !this.state.mobileDiagOpen });
+  }
+
+  handleMobileActivateFn = (activated) => {
+    this.setState({
+        mobileDiagOpen: !this.state.mobileDiagOpen,
+        mobileMode: activated
+    });
   }
 
   handleResizeStart = downEvent => {
