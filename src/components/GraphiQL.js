@@ -141,6 +141,8 @@ export class GraphiQL extends React.Component {
         this.componentWillUnmount()
       );
     }
+
+    this._headers = {};
   }
 
   componentDidMount() {
@@ -541,7 +543,7 @@ export class GraphiQL extends React.Component {
     });
   }
 
-  _fetchQuery(query, variables, operationName, cb) {
+  _fetchQuery(query, variables, operationName, headers, cb) {
     const fetcher = this.props.fetcher;
     let jsonVariables = null;
 
@@ -560,7 +562,7 @@ export class GraphiQL extends React.Component {
       query,
       variables: jsonVariables,
       operationName
-    });
+    }, headers);
 
     if (isPromise(fetch)) {
       // If fetcher returned a Promise, then call the callback when the promise
@@ -625,6 +627,8 @@ export class GraphiQL extends React.Component {
       }
     }
 
+    var headers = this._headers;
+
     try {
       this.setState({
         isWaitingForResponse: true,
@@ -637,6 +641,7 @@ export class GraphiQL extends React.Component {
         editedQuery,
         variables,
         operationName,
+        headers,
         result => {
           if (queryID === this._editorQueryID) {
             this.setState({
@@ -798,11 +803,12 @@ export class GraphiQL extends React.Component {
     this.setState({ mobileDiagOpen: !this.state.mobileDiagOpen });
   }
 
-  handleMobileActivateFn = (activated) => {
+  handleMobileActivateFn = (activated, headers) => {
     this.setState({
         mobileDiagOpen: !this.state.mobileDiagOpen,
         mobileMode: activated
     });
+    this._headers = headers;
   }
 
   handleResizeStart = downEvent => {
@@ -948,7 +954,7 @@ export class GraphiQL extends React.Component {
 GraphiQL.Logo = function GraphiQLLogo(props) {
   return (
     <div className="title">
-      {props.children || <span>{'Graph'}<em>{'i'}</em>{'QL'}</span>}
+      {props.children || <span>{'Grap'}<em>{'h'}</em>{'ouzz'}</span>}
     </div>
   );
 };

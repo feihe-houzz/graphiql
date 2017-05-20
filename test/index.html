@@ -25,6 +25,7 @@
     <script src="./vendor/fetch.min.js"></script>
     <script src="./vendor/react-15.4.2.js"></script>
     <script src="./vendor/react-dom-15.4.2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
 
     <!-- Load each file individually for better debugging  -->
     <!-- Note that in practice, a compiled graphiql.css is included -->
@@ -107,13 +108,19 @@
       }
 
       // Defines a GraphQL fetcher using the fetch API.
-      function graphQLFetcher(graphQLParams) {
-        return fetch('/graphql', {
-          method: 'post',
-          headers: {
+      function graphQLFetcher(graphQLParams, extraHeaders) {
+        var headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-          },
+        };
+
+        console.log('extraHeaders: ', extraHeaders);
+
+        headers = _.extend(headers, extraHeaders);
+
+        return fetch('/j/graphql?', {
+          method: 'post',
+          headers: headers,
           body: JSON.stringify(graphQLParams),
           credentials: 'include',
         }).then(function (response) {

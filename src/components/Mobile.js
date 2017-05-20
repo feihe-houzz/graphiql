@@ -21,57 +21,77 @@ export class Mobile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-        }
+        };
+        this.headers = [
+            {
+                name: 'HTTP-X-HOUZZ-API-APP-NAME',
+                value: 'test1'
+            },
+            {
+                name: 'HTTP-X-HOUZZ-API-APP-AGENT',
+                value: 'iPhone81~iOS 9.3.2~com.houzz.app~Build 2725'
+            },
+            {
+                name: 'HTTP-X-HOUZZ-API-USER-NAME',
+                value: 'garyyue'
+            },
+            {
+                name: 'HTTP-X-HOUZZ-API-SSL-TOKEN',
+                value: 'fQAAAAAAGfQfWRREoUMASr7fWuUKlsmZ0WS1K4b4nHGIpYTaywLWOQk61Cp4HGdhcnl5dWU='
+            },
+            {
+                name: 'HTTP-X-HOUZZ-API-VISITOR-TOKEN',
+                value: '140EFB95-26CD-4310-89A3-3EDF545748F9'
+            },
+            {
+                name: 'HTTP-X-HOUZZ-API-IDFA',
+                value: '82303DFA-8EBF-447D-9AC3-7CB596959258'
+            },
+            {
+                name: 'HTTP-X-HOUZZ-API-LOCALE',
+                value: 'en-US'
+            },
+            {
+                name: 'HTTP-X-HOUZZ-API-SITE-ID',
+                value: '101'
+            }
+        ];
     }
 
     render() {
         const { show } = this.props;
         var modalStyle = { display: show ? 'block' : 'none'};
 
+        var headerFields = [];
+        _.each(this.headers, function(header) {
+            headerFields.push(
+                <div className='mobile-field'>
+                    <div style={{width: '260'}}>{header.name}</div>
+                    <input value={header.value} style={{minWidth: '400'}} ref={header.name}/>
+                </div>
+            );
+        });
+
         return (
         <div className="mobile-modal" style={modalStyle}>
             <div className="mobile-modal-content">
                 <p><b>Mobile mode</b></p>
                 <div style={{ width: '90%', display: 'flex', flexDirection: 'column' }}>
-                    <div className='mobile-field'>
-                        <div style={{width: '260'}}>HTTP-X-HOUZZ-API-APP-NAME</div>
-                        <input value='test1' style={{minWidth: '400'}}/>
-                    </div>
-                    <div className='mobile-field'>
-                        <div style={{minWidth: '260'}}>HTTP-X-HOUZZ-API-APP-AGENT</div>
-                        <input value='iPhone81~iOS 9.3.2~com.houzz.app~Build 2725' style={{minWidth: '400'}}/>
-                    </div>
-                    <div className='mobile-field'>
-                        <div style={{minWidth: '260'}}>HTTP-X-HOUZZ-API-USER-NAME</div>
-                        <input value='garyyue' style={{minWidth: '400'}}/>
-                    </div>
-                    <div className='mobile-field'>
-                        <div style={{minWidth: '260'}}>HTTP-X-HOUZZ-API-SSL-TOKEN</div>
-                        <input value='fQAAAAAALtcHWRLFEAQNr25Ew4kNNybKn5KfmDM4mA/xAiLn0CLS51a7ygSQtmdhcnl5dWU=' style={{minWidth: '400'}}/>
-                    </div>
-                    <div className='mobile-field'>
-                        <div style={{minWidth: '260'}}>HTTP-X-HOUZZ-API-VISITOR-TOKEN</div>
-                        <input value='140EFB95-26CD-4310-89A3-3EDF545748F9' style={{minWidth: '400'}}/>
-                    </div>
-                    <div className='mobile-field'>
-                        <div style={{width: '260'}}>HTTP-X-HOUZZ-API-IDFA</div>
-                        <input value='82303DFA-8EBF-447D-9AC3-7CB596959258' style={{minWidth: '400'}}/>
-                    </div>
-                    <div className='mobile-field'>
-                        <div style={{width: '260'}}>HTTP-X-HOUZZ-API-LOCALE</div>
-                        <input value='en-US' style={{minWidth: '400'}}/>
-                    </div>
-                    <div className='mobile-field'>
-                        <div style={{width: '260'}}>HTTP-X-HOUZZ-API-SITE-ID</div>
-                        <input value='101' style={{minWidth: '400'}}/>
-                    </div>
+                    {headerFields}
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'row', marginTop: 20 }}>
                     <div className='mobile-button' onClick={() => this.props.mobileActivateFn(false)}>
                         deactivate
                     </div>
-                    <div className='mobile-button' onClick={() => this.props.mobileActivateFn(true)}>
+                    <div className='mobile-button' onClick={() => {
+                            var headers = {}
+                            _.each(this.headers, function(header) {
+                                headers[header.name] = this.refs[header.name].value;
+                            }.bind(this));
+                            console.log('headers in mobile: ', headers);
+                            this.props.mobileActivateFn(true, headers);
+                        }}>
                         activate
                     </div>
                 </div>
