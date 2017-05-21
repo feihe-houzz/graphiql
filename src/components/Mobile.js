@@ -37,7 +37,7 @@ export class Mobile extends React.Component {
             },
             {
                 name: 'HTTP-X-HOUZZ-API-SSL-TOKEN',
-                value: 'fQAAAAAAGfQfWRREoUMASr7fWuUKlsmZ0WS1K4b4nHGIpYTaywLWOQk61Cp4HGdhcnl5dWU='
+                value: 'fQAAAAAA/94gWRREoUM1FWgyzr/mWa8VciptKd413ItOWtZ1alOfF3GJlTjr32dhcnl5dWU='
             },
             {
                 name: 'HTTP-X-HOUZZ-API-VISITOR-TOKEN',
