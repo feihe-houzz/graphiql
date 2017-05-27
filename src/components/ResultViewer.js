@@ -63,6 +63,21 @@ export class ResultViewer extends React.Component {
 
   componentDidUpdate() {
     this.viewer.setValue(this.props.value || '');
+
+    var resultImageObjs = [];
+    $("span:contains('url') .cm-property").siblings("span:contains('.jpg') .cm-string").each(
+        function() {
+            console.log($(this).text() + ' - ', $(this).offset());
+            resultImageObjs.push(
+                {
+                    url: $(this).text(),
+                    top: $(this).offset().top
+                }
+            );
+        }
+    );
+
+    this.props.resultImageObjFn(resultImageObjs);
   }
 
   componentWillUnmount() {
@@ -70,6 +85,7 @@ export class ResultViewer extends React.Component {
   }
 
   render() {
+
     return (
       <div
         className="result-window"

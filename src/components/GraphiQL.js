@@ -113,12 +113,15 @@ export class GraphiQL extends React.Component {
       variables,
       operationName,
       response: props.response,
+      resultImages: [],
       editorFlex: Number(this._storage.get('editorFlex')) || 1,
       variableEditorOpen: Boolean(variables),
       variableEditorHeight:
         Number(this._storage.get('variableEditorHeight')) || 200,
       docExplorerOpen:
         (this._storage.get('docExplorerOpen') === 'true') || false,
+      imagesExplorerOpen:
+        (this._storage.get('imagesExplorerOpen') === 'true') || false,
       historyPaneOpen:
           (this._storage.get('historyPaneOpen') === 'true') || false,
       thriftDiagOpen:
@@ -156,6 +159,7 @@ export class GraphiQL extends React.Component {
     this.codeMirrorSizer = new CodeMirrorSizer();
 
     global.g = this;
+
   }
 
   componentWillReceiveProps(nextProps) {
@@ -238,6 +242,7 @@ export class GraphiQL extends React.Component {
     this._storage.set('variableEditorHeight', this.state.variableEditorHeight);
     this._storage.set('docExplorerWidth', this.state.docExplorerWidth);
     this._storage.set('docExplorerOpen', this.state.docExplorerOpen);
+    this._storage.set('imagesExplorerOpen', this.state.imagesExplorerOpen);
     this._storage.set('historyPaneOpen', this.state.historyPaneOpen);
   }
 
@@ -286,6 +291,10 @@ export class GraphiQL extends React.Component {
       display: this.state.docExplorerOpen ? 'block' : 'none',
       width: this.state.docExplorerWidth,
     };
+    const imagesWrapStyle = {
+      display: this.state.imagesExplorerOpen ? 'block' : 'none',
+      width: this.state.docExplorerWidth,
+    };
     const docExplorerWrapClasses = 'docExplorerWrap' +
       (this.state.docExplorerWidth < 200 ? ' doc-explorer-narrow' : '');
 
@@ -332,6 +341,14 @@ export class GraphiQL extends React.Component {
               />
               {toolbar}
             </div>
+            {
+              !this.state.imagesExplorerOpen &&
+              <button
+                className="docExplorerShow"
+                onClick={this.handleToggleImages}>
+                {'Images'}
+              </button>
+            }
             {
               !this.state.docExplorerOpen &&
               <button
@@ -385,6 +402,7 @@ export class GraphiQL extends React.Component {
                 ref={c => { this.resultComponent = c; }}
                 value={this.state.response}
                 editorTheme={this.props.editorTheme}
+                resultImageObjFn={this.handleResultImages}
               />
               {footer}
             </div>
@@ -399,6 +417,19 @@ export class GraphiQL extends React.Component {
             ref={c => { this.docExplorerComponent = c; }}
             schema={this.state.schema}>
             <div className="docExplorerHide" onClick={this.handleToggleDocs}>
+              {'\u2715'}
+            </div>
+          </DocExplorer>
+        </div>
+        <div className={docExplorerWrapClasses} style={imagesWrapStyle}>
+          <div
+            className="docExplorerResizer"
+            onMouseDown={this.handleDocsResizeStart}
+          />
+          <DocExplorer
+            ref={c => { this.docExplorerComponent = c; }}
+            schema={this.state.schema}>
+            <div className="docExplorerHide" onClick={this.handleToggleImages}>
               {'\u2715'}
             </div>
           </DocExplorer>
@@ -606,6 +637,15 @@ export class GraphiQL extends React.Component {
     });
   }
 
+  handleResultImages = images => {
+      console.log('images !!', images);
+      this.setState(
+        {
+            resultImages: images
+        }
+      )
+  }
+
   handleRunQuery = selectedOperationName => {
     this._editorQueryID++;
     const queryID = this._editorQueryID;
@@ -786,6 +826,13 @@ export class GraphiQL extends React.Component {
       this.props.onToggleDocs(!this.state.docExplorerOpen);
     }
     this.setState({ docExplorerOpen: !this.state.docExplorerOpen });
+  }
+
+  handleToggleImages = () => {
+    if (typeof this.props.onToggleImages === 'function') {
+      this.props.onToggleImages(!this.state.imagesExplorerOpen);
+    }
+    this.setState({ imagesExplorerOpen: !this.state.imagesExplorerOpen });
   }
 
   handleToggleHistory = () => {
