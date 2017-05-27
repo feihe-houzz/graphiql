@@ -25,7 +25,15 @@ export default class SearchBox extends React.Component {
     this.debouncedOnSearch = debounce(200, this.props.onSearch);
   }
 
+  componentDidUpdate() {
+    var { force } = this.props;
+    if (force) {
+        this.handleChange({target: {value: force}});
+    }
+  }
+
   render() {
+
     return (
       <label className="search-box">
         <input

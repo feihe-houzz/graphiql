@@ -25,11 +25,13 @@
     <script src="./vendor/fetch.min.js"></script>
     <script src="./vendor/react-15.4.2.js"></script>
     <script src="./vendor/react-dom-15.4.2.js"></script>
+    <script src="../node_modules/jsonpath/jsonpath.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
 
     <!-- Load each file individually for better debugging  -->
     <!-- Note that in practice, a compiled graphiql.css is included -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="css/codemirror.css" />
     <link rel="stylesheet" href="css/doc-explorer.css" />
@@ -118,6 +120,39 @@
         console.log('extraHeaders: ', extraHeaders);
 
         headers = _.extend(headers, extraHeaders);
+
+const MOCK = {
+    data: {
+        photos: {
+            items: [
+                {
+                    id: '1',
+                    title: 'backyard lounge',
+                    url: 'https://st.hzcdn.com/fimgs/1691882808e1753e_6226-w300-h300-b0-p0--traditional-porch.jpg'
+                },
+                {
+                    id: '2',
+                    title: 'traditional kitchen',
+                    url: 'https://st.hzcdn.com/fimgs/38110dd308d95e45_0873-w300-h300-b0-p0--traditional-kitchen.jpg'
+                },
+                {
+                    id: '3',
+                    title: 'rustic kitchen',
+                    url: 'https://st.hzcdn.com/fimgs/8811746408ebb5db_5220-w300-h300-b0-p0--rustic-kitchen.jpg'
+                },
+                {
+                    id: '4',
+                    title: 'contemporary bathroom',
+                    url: 'https://st.hzcdn.com/fimgs/69510bcc08bfa031_2698-w300-h300-b0-p0--contemporary-bathroom.jpg'
+                }
+            ]
+        }
+    }
+};
+
+        return Promise.resolve(MOCK).then(res => {
+            return res;
+        });
 
         return fetch('/j/graphql?', {
           method: 'post',

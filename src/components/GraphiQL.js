@@ -27,6 +27,7 @@ import { QueryEditor } from './QueryEditor';
 import { VariableEditor } from './VariableEditor';
 import { ResultViewer } from './ResultViewer';
 import { DocExplorer } from './DocExplorer';
+import ParserExplorer from './ParserExplorer';
 import { QueryHistory } from './QueryHistory';
 import CodeMirrorSizer from '../utility/CodeMirrorSizer';
 import StorageAPI from '../utility/StorageAPI';
@@ -120,8 +121,8 @@ export class GraphiQL extends React.Component {
         Number(this._storage.get('variableEditorHeight')) || 200,
       docExplorerOpen:
         (this._storage.get('docExplorerOpen') === 'true') || false,
-      imagesExplorerOpen:
-        (this._storage.get('imagesExplorerOpen') === 'true') || false,
+      parserExplorerOpen:
+        (this._storage.get('parserExplorerOpen') === 'true') || false,
       historyPaneOpen:
           (this._storage.get('historyPaneOpen') === 'true') || false,
       thriftDiagOpen:
@@ -242,7 +243,7 @@ export class GraphiQL extends React.Component {
     this._storage.set('variableEditorHeight', this.state.variableEditorHeight);
     this._storage.set('docExplorerWidth', this.state.docExplorerWidth);
     this._storage.set('docExplorerOpen', this.state.docExplorerOpen);
-    this._storage.set('imagesExplorerOpen', this.state.imagesExplorerOpen);
+    this._storage.set('parserExplorerOpen', this.state.parserExplorerOpen);
     this._storage.set('historyPaneOpen', this.state.historyPaneOpen);
   }
 
@@ -291,8 +292,8 @@ export class GraphiQL extends React.Component {
       display: this.state.docExplorerOpen ? 'block' : 'none',
       width: this.state.docExplorerWidth,
     };
-    const imagesWrapStyle = {
-      display: this.state.imagesExplorerOpen ? 'block' : 'none',
+    const parserWrapStyle = {
+      display: this.state.parserExplorerOpen ? 'block' : 'none',
       width: this.state.docExplorerWidth,
     };
     const docExplorerWrapClasses = 'docExplorerWrap' +
@@ -342,11 +343,11 @@ export class GraphiQL extends React.Component {
               {toolbar}
             </div>
             {
-              !this.state.imagesExplorerOpen &&
+              !this.state.parserExplorerOpen &&
               <button
                 className="docExplorerShow"
-                onClick={this.handleToggleImages}>
-                {'Images'}
+                onClick={this.handleToggleParser}>
+                {'Parser'}
               </button>
             }
             {
@@ -402,7 +403,6 @@ export class GraphiQL extends React.Component {
                 ref={c => { this.resultComponent = c; }}
                 value={this.state.response}
                 editorTheme={this.props.editorTheme}
-                resultImageObjFn={this.handleResultImages}
               />
               {footer}
             </div>
@@ -421,18 +421,20 @@ export class GraphiQL extends React.Component {
             </div>
           </DocExplorer>
         </div>
-        <div className={docExplorerWrapClasses} style={imagesWrapStyle}>
+        <div className={docExplorerWrapClasses} style={parserWrapStyle}>
           <div
             className="docExplorerResizer"
             onMouseDown={this.handleDocsResizeStart}
           />
-          <DocExplorer
+          <ParserExplorer
             ref={c => { this.docExplorerComponent = c; }}
-            schema={this.state.schema}>
-            <div className="docExplorerHide" onClick={this.handleToggleImages}>
+            schema={this.state.schema}
+            result={this.state.response}
+            >
+            <div className="docExplorerHide" onClick={this.handleToggleParser}>
               {'\u2715'}
             </div>
-          </DocExplorer>
+          </ParserExplorer>
         </div>
       </div>
     );
@@ -637,15 +639,6 @@ export class GraphiQL extends React.Component {
     });
   }
 
-  handleResultImages = images => {
-      console.log('images !!', images);
-      this.setState(
-        {
-            resultImages: images
-        }
-      )
-  }
-
   handleRunQuery = selectedOperationName => {
     this._editorQueryID++;
     const queryID = this._editorQueryID;
@@ -828,11 +821,11 @@ export class GraphiQL extends React.Component {
     this.setState({ docExplorerOpen: !this.state.docExplorerOpen });
   }
 
-  handleToggleImages = () => {
+  handleToggleParser = () => {
     if (typeof this.props.onToggleImages === 'function') {
-      this.props.onToggleImages(!this.state.imagesExplorerOpen);
+      this.props.onToggleImages(!this.state.parserExplorerOpen);
     }
-    this.setState({ imagesExplorerOpen: !this.state.imagesExplorerOpen });
+    this.setState({ parserExplorerOpen: !this.state.parserExplorerOpen });
   }
 
   handleToggleHistory = () => {
