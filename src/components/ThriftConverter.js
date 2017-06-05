@@ -28,8 +28,9 @@ export class ThriftConverter extends React.Component {
     }
 
     _extractField(data) {
-        const rx = /(\S+)\s+(\S+)\s+(\w+)/g;
+        const rx = /^(\S+)\s+(.+)\s+(\w+)$/g;
         var arr = rx.exec(data);
+
         if (arr == null || arr.length != 4) {
             return null;
         }
@@ -49,12 +50,12 @@ export class ThriftConverter extends React.Component {
 
         var typeName = arr[1];
         var extracted =  arr[2];
-        var fields = extracted.split(',');
+        var fields = extracted.split(',\n');
         var tmp = [];
         _.each(fields, function(field) {
+
             var trimmed = field.trim();
-            if (trimmed.length != 0 && !trimmed.includes('base.Context') &&
-                this._extractField(trimmed)) {
+            if (trimmed.length != 0 && !trimmed.includes('base.Context')) {
                 tmp.push(this._extractField(trimmed));
             }
         }.bind(this));
