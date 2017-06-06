@@ -67,7 +67,7 @@ export class Mobile extends React.Component {
             headerFields.push(
                 <div className='mobile-field'>
                     <div style={{width: '260'}}>{header.name}</div>
-                    <input value={header.value} style={{minWidth: '400'}} ref={header.name}/>
+                    <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
                 </div>
             );
         });
