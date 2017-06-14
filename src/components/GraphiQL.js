@@ -29,6 +29,7 @@ import { ResultViewer } from './ResultViewer';
 import { DocExplorer } from './DocExplorer';
 import ParserExplorer from './ParserExplorer';
 import { QueryHistory } from './QueryHistory';
+import { VersionHistory } from './VersionHistory';
 import CodeMirrorSizer from '../utility/CodeMirrorSizer';
 import StorageAPI from '../utility/StorageAPI';
 import getQueryFacts from '../utility/getQueryFacts';
@@ -125,6 +126,8 @@ export class GraphiQL extends React.Component {
         (this._storage.get('parserExplorerOpen') === 'true') || false,
       historyPaneOpen:
           (this._storage.get('historyPaneOpen') === 'true') || false,
+      versionPaneOpen:
+          (this._storage.get('versionPaneOpen') === 'true') || false,
       thriftDiagOpen:
           (this._storage.get('thriftDiagOpen') === 'true') || false,
       mobileDiagOpen:
@@ -245,6 +248,7 @@ export class GraphiQL extends React.Component {
     this._storage.set('docExplorerOpen', this.state.docExplorerOpen);
     this._storage.set('parserExplorerOpen', this.state.parserExplorerOpen);
     this._storage.set('historyPaneOpen', this.state.historyPaneOpen);
+    this._storage.set('versionPaneOpen', this.state.versionPaneOpen);
   }
 
   render() {
@@ -278,6 +282,11 @@ export class GraphiQL extends React.Component {
           label="Mobile"
           highlighted={this.state.mobileMode}
         />
+        <ToolbarButton
+          onClick={this.handleToggleVersion}
+          title="Show version"
+          label="Versions"
+        />
 
       </GraphiQL.Toolbar>;
 
@@ -305,6 +314,12 @@ export class GraphiQL extends React.Component {
       zIndex: '7'
     };
 
+    const versionPaneStyle = {
+      display: this.state.versionPaneOpen ? 'block' : 'none',
+      width: '300px',
+      zIndex: '7'
+    };
+
     const variableOpen = this.state.variableEditorOpen;
     const variableStyle = {
       height: variableOpen ? this.state.variableEditorHeight : null
@@ -329,6 +344,19 @@ export class GraphiQL extends React.Component {
               {'\u2715'}
             </div>
           </QueryHistory>
+        </div>
+        <div className="historyPaneWrap" style={versionPaneStyle}>
+          <VersionHistory
+            operationName={this.state.operationName}
+            query={this.state.query}
+            variables={this.state.variables}
+            onSelectQuery={this.replaceQuery.bind(this)}
+            storage={this._storage}
+            queryID={this._editorQueryID}>
+            <div className="docExplorerHide" onClick={this.handleToggleVersion}>
+              {'\u2715'}
+            </div>
+          </VersionHistory>
         </div>
         <div className="editorWrap">
           <div className="topBarWrap">
@@ -512,6 +540,9 @@ export class GraphiQL extends React.Component {
   }
 
   replaceQuery(query, variables, operationName) {
+      console.log('replace query: ', query);
+      console.log('replace variables: ', variables);
+      console.log('replace operationName: ', operationName);
     this.setState({
       query,
       variables,
@@ -833,6 +864,10 @@ export class GraphiQL extends React.Component {
       this.props.onToggleHistory(!this.state.historyPaneOpen);
     }
     this.setState({ historyPaneOpen: !this.state.historyPaneOpen });
+  }
+
+  handleToggleVersion = () => {
+    this.setState({ versionPaneOpen: !this.state.versionPaneOpen });
   }
 
   handleToggleThrift = () => {
