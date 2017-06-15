@@ -234,6 +234,7 @@ export class GraphiQL extends React.Component {
       this.variableEditorComponent,
       this.resultComponent,
     ]);
+    console.log('current operation name: ', this.state.operationName);
   }
 
   // When the component is about to unmount, store any persistable state, such
@@ -283,7 +284,7 @@ export class GraphiQL extends React.Component {
           highlighted={this.state.mobileMode}
         />
         <ToolbarButton
-          onClick={this.handleToggleVersion}
+          onClick={this.handleToggleVersions}
           title="Show version"
           label="Versions"
         />
@@ -353,7 +354,7 @@ export class GraphiQL extends React.Component {
             onSelectQuery={this.replaceQuery.bind(this)}
             storage={this._storage}
             queryID={this._editorQueryID}>
-            <div className="docExplorerHide" onClick={this.handleToggleVersion}>
+            <div className="docExplorerHide" onClick={this.handleToggleVersions}>
               {'\u2715'}
             </div>
           </VersionHistory>
@@ -866,7 +867,7 @@ export class GraphiQL extends React.Component {
     this.setState({ historyPaneOpen: !this.state.historyPaneOpen });
   }
 
-  handleToggleVersion = () => {
+  handleToggleVersions = () => {
     this.setState({ versionPaneOpen: !this.state.versionPaneOpen });
   }
 
