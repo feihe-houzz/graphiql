@@ -48,6 +48,7 @@
     "marked": "0.3.6",
     "react": "^15.5.4",
     "react-copy-to-clipboard": "^5.0.0",
+    "react-toastr": "^2.8.2",
     "strip-indent": "^2.0.0"
   },
   "peerDependencies": {

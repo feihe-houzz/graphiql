@@ -5,6 +5,12 @@ import HistoryStore from '../utility/HistoryStore';
 import HistoryQuery from './HistoryQuery';
 import StripIndent from 'strip-indent';
 import _ from 'lodash';
+var ReactToastr = require("react-toastr");
+var {ToastContainer} = ReactToastr; // This is a React Element.
+// For Non ES6...
+// var ToastContainer = ReactToastr.ToastContainer;
+var ToastMessageFactory = React.createFactory(ReactToastr.ToastMessage.animation);
+
 
 const MAX_HISTORY_LENGTH = 20;
 
@@ -24,7 +30,6 @@ export class VersionHistory extends React.Component {
        currentVersion: 0,
        currentQuery: 0,
        shouldUpdateQueryEditor: false,
-       buttonsOpen: false,
        versions: [
             {
                 id: 1,
@@ -192,7 +197,8 @@ export class VersionHistory extends React.Component {
           const chosen = query.name === this.state.currentQuery;
           if (chosen) {
             hasChosen = true;
-            selectQueryFn(StripIndent(query.value), '', query.name); // notify parent
+            var queryValue = query.value ? query.value : query.devices[this.state.currentDevice];
+            selectQueryFn(StripIndent(queryValue), '', query.name); // notify parent
           }
         });
 
@@ -215,10 +221,23 @@ export class VersionHistory extends React.Component {
                 currentVersion: i,
                 shouldUpdateQueryEditor: true
             })} style={style}>
-            version {i}
+            v {i}
         </div>
       );
     });
+  }
+
+  renderToast(msg) {
+
+    return (
+        <div style={{
+            position: 'absolute', right: '40%', bottom: '20px',
+            backgroundColor: 'black', color: '#f2f2f2', padding: '5px 10px',
+            justifyContent: 'center', alignItems: 'center'
+        }}>
+            {msg}
+        </div>
+    );
   }
 
   renderQueries() {
@@ -228,25 +247,74 @@ export class VersionHistory extends React.Component {
         backgroundColor: '#f4f4f4'
       } : null;
 
-      const buttonsOpen = chosen && this.state.buttonsOpen;
-
-      const deviceButtons = buttonsOpen ? (
+      const showDeviceButtons = chosen && !query.value;
+      const deviceButtons = showDeviceButtons ? (
         <div key={'device-buttons'} className="versions-row-buttons" onClick={() => {
             }}>
             <div className="hoverHighlight" style={{flex: 1, justifyContent: 'center', borderRightWidth: '1px',
-                fontSize: '10px', color: '', borderRight: '2px solid gray'}}>
+                fontSize: '10px', color: '', borderRight: '2px solid gray', backgroundColor: this.state.currentDevice === 'iOS' ? '#f4f4f4' : ''}}
+                onClick={() => {
+                    this.setState({
+                        currentDevice: 'iOS',
+                        shouldUpdateQueryEditor: true,
+                    })
+                }}>
                 iOS
             </div>
-            <div className="hoverHighlight" style={{flex: 1, justifyContent: 'center', borderRightWidth: '1px', fontSize: '10px', color: ''}}>
+            <div className="hoverHighlight" style={{flex: 1, justifyContent: 'center', borderRightWidth: '1px',
+                    fontSize: '10px', color: '', backgroundColor: this.state.currentDevice === 'android' ? '#f4f4f4' : ''}}
+                onClick={() => {
+                    this.setState({
+                        currentDevice: 'android',
+                        shouldUpdateQueryEditor: true,
+                    })
+                }}>
                 android
             </div>
         </div>
         ) : null;
 
-      const actionButtons = buttonsOpen ? (
+      var forkClass = "fa fa-code-fork hoverHighlight";
+      forkClass += query.value ? "" : " fa-rotate-180";
+
+      var forkStyle = {flex: 1, justifyContent: 'center', color: '', fontSize: '13px', borderRight: '2px solid gray'};
+
+      const actionButtons = chosen ? (
         <div key={'action-buttons'} className="versions-row-icons">
-            <i key={'copy'} className="fa fa-clone hoverHighlight" aria-hidden="true"
-               style={{flex: 1, justifyContent: 'center', borderRight: '2px solid gray', color: 'blue', fontSize: '13px'}}
+            <i key={'fork'} className={forkClass} aria-hidden="true"
+               style={forkStyle}
+               onClick={() => {
+                    var currentQueries = this.state.versions[this.state.currentVersion].queries;
+                    _.each(currentQueries, (query, i) => {
+                        const chosen = query.name === this.state.currentQuery;
+                        if (chosen) {
+                            if (query.value) {
+                                query.devices = {};
+                                query.devices.iOS = query.value;
+                                query.devices.android = query.value;
+                                query.value = null;
+                            } else {
+                                query.value = query.devices.iOS;
+                                delete query.devices;
+                            }
+
+                            this.setState({
+                                versions: this.state.versions,
+                                currentDevice: 'iOS',
+                                shouldUpdateQueryEditor: true,
+                            })
+
+                            return false;
+                        }
+                    });
+                    this.refs.container.success(
+                        "",
+                        "splitted into iOS and android", {
+                            timeOut: 3000,
+                        });
+               }}></i>
+            <i key={'clone'} className="fa fa-clone hoverHighlight" aria-hidden="true"
+               style={{flex: 1, justifyContent: 'center', borderRight: '2px solid gray', color: '#5ac0df', fontSize: '13px'}}
                onClick={() => {
                     var newOperationName = this.props.operationName;
                     newOperationName += 'Cloned';
@@ -259,7 +327,12 @@ export class VersionHistory extends React.Component {
                             console.log('newQuery before: ', newQuery);
                             console.log('current query: ', this.state.currentQuery);
 
-                            newQuery.value = newQuery.value.replace(this.state.currentQuery, newOperationName);
+                            if (newQuery.value) {
+                                newQuery.value = newQuery.value.replace(this.state.currentQuery, newOperationName);
+                            } else {
+                                newQuery.devices.iOS = newQuery.devices.iOS.replace(this.state.currentQuery, newOperationName);
+                                newQuery.devices.android = newQuery.devices.android.replace(this.state.currentQuery, newOperationName);
+                            }
 
                             console.log('newQuery after: ', newQuery);
 
@@ -273,16 +346,27 @@ export class VersionHistory extends React.Component {
                         currentQuery: newOperationName,
                         shouldUpdateQueryEditor: true,
                     })
+                    this.refs.container.success(
+                        "",
+                        "cloned", {
+                            timeOut: 3000,
+                        });
                }}></i>
             <i key={'save'} className="fa fa-floppy-o hoverHighlight" aria-hidden="true"
-               style={{flex: 1, justifyContent: 'center', borderRight: '2px solid gray', color: 'green', fontSize: '14px'}}
+               style={{flex: 1, justifyContent: 'center', borderRight: '2px solid gray', color: '#3C9450', fontSize: '14px'}}
                onClick={() => {
                     const newOperationName = this.props.operationName;
+
                     _.each(this.state.versions[this.state.currentVersion].queries, (query, i) => {
                         const chosen = query.name === this.state.currentQuery;
                         if (chosen) {
                             query.name = newOperationName;
-                            query.value = this.props.query;
+
+                            if (query.value) {
+                                query.value = this.props.query;
+                            } else {
+                                query.devices[this.state.currentDevice] = this.props.query;
+                            }
                             return false;
                         }
                     });
@@ -290,9 +374,14 @@ export class VersionHistory extends React.Component {
                         versions: this.state.versions,
                         currentQuery: newOperationName
                     })
-               }}></i>
+                    this.refs.container.success(
+                        "",
+                        "saved", {
+                            timeOut: 3000,
+                        });
+                }}></i>
             <i key={'delete'} className="fa fa-trash-o hoverHighlight" aria-hidden="true"
-               style={{flex: 1, justifyContent: 'center', color: 'red', fontSize: '14px'}}
+               style={{flex: 1, justifyContent: 'center', color: '#f88664', fontSize: '14px'}}
                onClick={() => {
                     _.remove(this.state.versions[this.state.currentVersion].queries, (query) => {
                         return query.name === this.state.currentQuery;
@@ -302,6 +391,11 @@ export class VersionHistory extends React.Component {
                         currentQuery: '',
                         shouldUpdateQueryEditor: true,
                     })
+                    this.refs.container.warning(
+                        "",
+                        "deleted", {
+                            timeOut: 3000,
+                        });
                }}></i>
         </div>
         ) : null;
@@ -310,10 +404,13 @@ export class VersionHistory extends React.Component {
         <div>
             {deviceButtons}
             <div key={i} className="versions-row-query" onClick={() => {
+                    var currentQuery = query.name;
+                    if (this.state.currentQuery === query.name) {
+                        currentQuery = '';
+                    }
                     this.setState({
-                        currentQuery: query.name,
+                        currentQuery,
                         shouldUpdateQueryEditor: true,
-                        buttonsOpen: !this.state.buttonsOpen
                     });
                 }} style={style}>
                 {query.name}
@@ -352,7 +449,10 @@ export class VersionHistory extends React.Component {
               {queryNodes}
             </div>
         </div>
-      </div>
+        <ToastContainer ref="container"
+                        toastMessageFactory={ToastMessageFactory}
+                        style={{position: 'absolute', right: '0px', bottom: '30px'}} />
+    </div>
     );
   }
 }
