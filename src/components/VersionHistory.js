@@ -240,6 +240,15 @@ export class VersionHistory extends React.Component {
     );
   }
 
+  toast(msg, method = 'success') {
+    this.refs.container[method](
+        "",
+        msg, {
+            timeOut: 3000,
+        }
+    );
+  }
+
   renderQueries() {
     return this.state.versions[this.state.currentVersion].queries.map((query, i) => {
       const chosen = query.name === this.state.currentQuery;
@@ -293,25 +302,30 @@ export class VersionHistory extends React.Component {
                                 query.devices.iOS = query.value;
                                 query.devices.android = query.value;
                                 query.value = null;
-                            } else {
-                                query.value = query.devices.iOS;
-                                delete query.devices;
-                            }
 
-                            this.setState({
-                                versions: this.state.versions,
-                                currentDevice: 'iOS',
-                                shouldUpdateQueryEditor: true,
-                            })
+                                this.toast('splitted into iOS and android');
+                                this.setState({
+                                    versions: this.state.versions,
+                                    currentDevice: 'iOS',
+                                    shouldUpdateQueryEditor: true,
+                                })
+                            } else {
+                                if (query.devices.iOS !== query.devices.android) {
+                                    this.toast('merge failed: device query mismatch', 'error');
+                                } else {
+                                    query.value = query.devices.iOS;
+                                    delete query.devices;
+                                    this.toast('merged iOS and android');
+                                }
+                                this.setState({
+                                    versions: this.state.versions,
+                                    shouldUpdateQueryEditor: true,
+                                })
+                            }
 
                             return false;
                         }
                     });
-                    this.refs.container.success(
-                        "",
-                        "splitted into iOS and android", {
-                            timeOut: 3000,
-                        });
                }}></i>
             <i key={'clone'} className="fa fa-clone hoverHighlight" aria-hidden="true"
                style={{flex: 1, justifyContent: 'center', borderRight: '2px solid gray', color: '#5ac0df', fontSize: '13px'}}
