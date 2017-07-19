@@ -65,6 +65,24 @@ export class VersionHistory extends React.Component {
                           }
                         }
                         `
+                    },
+                    {
+                        name: 'getActiveABTests',
+                        value: `
+                        query getActiveABTests {
+                          abTests(dump:false, web:false, mobile:true) {
+                            name
+                            description
+                            chosenBucket
+                            buckets {
+                              name
+                              description
+                              isControl
+                              slots
+                            }
+                          }
+                        }
+                        `
                     }
                 ]
             },
@@ -103,6 +121,17 @@ export class VersionHistory extends React.Component {
                           posts {
                             id
                             title
+                          }
+                        }
+                        `
+                    },
+                    {
+                        name: 'getABTests',
+                        value: `
+                        query getABTests {
+                          abTests(dump:true, web:false, mobile:true) {
+                            name
+                            description
                           }
                         }
                         `
@@ -317,7 +346,7 @@ export class VersionHistory extends React.Component {
       var pointer = null;
       var pointerStyle = {
           position: 'absolute', left: 5, top: 2, padding: 3, borderWidth: 1, width: 28,
-          borderRadius: 4, backgroundColor: 'red', color: 'white', fontSize: 9
+          borderRadius: 4, backgroundColor: '#088DA5', color: 'white', fontSize: 9
       };
       if (pointers.prod === version.id) {
           pointer = <div style={pointerStyle}>PROD</div>
@@ -330,7 +359,7 @@ export class VersionHistory extends React.Component {
       var livePointer = null;
       var livePointerStyle = {
           position: 'absolute', right: 2, top: 2, padding: 3, borderWidth: 1, width: 23,
-          borderRadius: 4, backgroundColor: '#088DA5', color: 'white', fontSize: 9
+          borderRadius: 4, backgroundColor: 'red', color: 'white', fontSize: 9
       };
       if (pointers.live === version.id) {
           livePointer = <div style={livePointerStyle}>LIVE</div>;
