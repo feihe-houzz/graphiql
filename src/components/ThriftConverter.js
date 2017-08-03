@@ -28,10 +28,10 @@ export class ThriftConverter extends React.Component {
     }
 
     _extractField(data) {
-        const rx = /^(\S+)\s+(.+)\s+(\w+)$/g;
+        const rx = /^\d+\s*:\s+(\w+)\s+(.+)\s+(\w+)\s*,/g;
         var arr = rx.exec(data);
 
-        if (arr == null || arr.length != 4) {
+        if (arr == null || arr.length < 4) {
             return null;
         }
 
@@ -50,16 +50,19 @@ export class ThriftConverter extends React.Component {
 
         var typeName = arr[1];
         var extracted =  arr[2];
-        var fields = extracted.split(',\n');
-        var tmp = [];
-        _.each(fields, function(field) {
+        var lines = extracted.split('\n');
+        var fields = [];
+        _.each(lines, function(line) {
 
-            var trimmed = field.trim();
-            if (trimmed.length != 0 && !trimmed.includes('base.Context')) {
-                tmp.push(this._extractField(trimmed));
+            var trimmed = line.trim();
+            var field = this._extractField(trimmed);
+            if (trimmed.length != 0 &&
+                !trimmed.includes('base.Context') &&
+                field
+                ) {
+                fields.push(field);
             }
         }.bind(this));
-        fields = tmp;
 
         return {
             name: typeName,
@@ -74,6 +77,8 @@ export class ThriftConverter extends React.Component {
             case 'i32': type = 'Int'; break;
             case 'string': type = 'String'; break;
             case 'bool': type = 'Boolean'; break;
+            case 'double': type = 'Float'; break;
+            case 'list<i32>': type = '[Int]'; break;
             default: type = 'Unknown'; break;
         }
 
