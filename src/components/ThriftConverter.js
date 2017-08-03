@@ -28,7 +28,7 @@ export class ThriftConverter extends React.Component {
     }
 
     _extractField(data) {
-        const rx = /^\d+\s*:\s+(\w+)\s+(.+)\s+(\w+)\s*,/g;
+        const rx = /\d+\s*:\s*(\w+)\s+(.+)\s+(\w+)\s*(,|\/)?/g;
         var arr = rx.exec(data);
 
         if (arr == null || arr.length < 4) {
@@ -42,7 +42,7 @@ export class ThriftConverter extends React.Component {
     }
 
     _extractStruct(data) {
-        const rx = /struct +(\w+) +{([\s\S]+)}/g;
+        const rx = /struct +(\w+)\s*{([\s\S]+)}/g;
         var arr = rx.exec(data);
         if (arr == null || arr.length < 2) {
             return null;
@@ -56,10 +56,7 @@ export class ThriftConverter extends React.Component {
 
             var trimmed = line.trim();
             var field = this._extractField(trimmed);
-            if (trimmed.length != 0 &&
-                !trimmed.includes('base.Context') &&
-                field
-                ) {
+            if (trimmed.length != 0 && field) {
                 fields.push(field);
             }
         }.bind(this));
@@ -79,6 +76,8 @@ export class ThriftConverter extends React.Component {
             case 'bool': type = 'Boolean'; break;
             case 'double': type = 'Float'; break;
             case 'list<i32>': type = '[Int]'; break;
+            case 'list<bool>': type = '[Boolean]'; break;
+            case 'list<string>': type = '[String]'; break;
             default: type = 'Unknown'; break;
         }
 
