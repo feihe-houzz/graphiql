@@ -24,35 +24,35 @@ export class Mobile extends React.Component {
         };
         this.headers = [
             {
-                name: 'HTTP-X-HOUZZ-API-APP-NAME',
+                name: 'X-HOUZZ-API-APP-NAME',
                 value: 'test1'
             },
             {
-                name: 'HTTP-X-HOUZZ-API-APP-AGENT',
+                name: 'X-HOUZZ-API-APP-AGENT',
                 value: 'iPhone81~iOS 9.3.2~com.houzz.app~Build 2725'
             },
             {
-                name: 'HTTP-X-HOUZZ-API-USER-NAME',
+                name: 'X-HOUZZ-API-USER-NAME',
                 value: 'garyyue'
             },
             {
-                name: 'HTTP-X-HOUZZ-API-SSL-TOKEN',
+                name: 'X-HOUZZ-API-SSL-TOKEN',
                 value: 'fQAAAAAAhyFpWRLFEAQ7FVObeEDCZ5EjmHXAjwHGcsPztmTRg4h3JTxWVfqWrmdhcnl5dWU='
             },
             {
-                name: 'HTTP-X-HOUZZ-API-VISITOR-TOKEN',
+                name: 'X-HOUZZ-API-VISITOR-TOKEN',
                 value: '140EFB95-26CD-4310-89A3-3EDF545748F9'
             },
             {
-                name: 'HTTP-X-HOUZZ-API-IDFA',
+                name: 'X-HOUZZ-API-IDFA',
                 value: '82303DFA-8EBF-447D-9AC3-7CB596959258'
             },
             {
-                name: 'HTTP-X-HOUZZ-API-LOCALE',
+                name: 'X-HOUZZ-API-LOCALE',
                 value: 'en-US'
             },
             {
-                name: 'HTTP-X-HOUZZ-API-SITE-ID',
+                name: 'X-HOUZZ-API-SITE-ID',
                 value: '101'
             }
         ];
