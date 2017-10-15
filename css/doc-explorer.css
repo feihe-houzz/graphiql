@@ -6,7 +6,7 @@
 .graphiql-container .history-title-bar {
   cursor: default;
   display: flex;
-  height: 34px;
+  height: 30px;
   line-height: 14px;
   padding: 8px 8px 5px;
   position: relative;
@@ -15,6 +15,17 @@
 
 .graphiql-container .doc-explorer-title,
 .graphiql-container .history-title {
+  flex: 1;
+  font-weight: bold;
+  overflow-x: hidden;
+  padding: 10px 0 10px 10px;
+  text-align: center;
+  text-overflow: ellipsis;
+  user-select: initial;
+  white-space: nowrap;
+}
+
+.history-title {
   flex: 1;
   font-weight: bold;
   overflow-x: hidden;

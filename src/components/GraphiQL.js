@@ -285,8 +285,8 @@ export class GraphiQL extends React.Component {
         />
         <ToolbarButton
           onClick={this.handleToggleVersions}
-          title="Show version"
-          label="Versions"
+          title="Query Management System"
+          label="QMS"
         />
 
       </GraphiQL.Toolbar>;
@@ -317,7 +317,7 @@ export class GraphiQL extends React.Component {
 
     const versionPaneStyle = {
       display: this.state.versionPaneOpen ? 'block' : 'none',
-      width: '300px',
+      width: '500px',
       zIndex: '7'
     };
 
