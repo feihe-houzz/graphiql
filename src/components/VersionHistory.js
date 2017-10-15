@@ -94,7 +94,7 @@ export class VersionHistory extends React.Component {
       let oldSignature = this.state.currentQueries[this.state.currentQueryIdx].signature;
       let curPlatform = this.state.currentPlatform;
 
-      var url = apiHelper.getUrl('version=' + curVersionNum + '&method=uploadGQL&format=json&dateFormat=sec&req=P&signature=' + oldSignature + '&platform=' + curPlatform + '&build=' + curBuildNum);
+      var url = apiHelper.getUrl('app=test1&version=' + curVersionNum + '&method=uploadGQL&format=json&dateFormat=sec&req=P&signature=' + oldSignature + '&platform=' + curPlatform + '&build=' + curBuildNum);
       fetch(url, headers).then(res => {
         // console.log(res);
         this.getCurrentQueries(this.state.currentBuildIdx);
@@ -478,11 +478,11 @@ export class VersionHistory extends React.Component {
     const buildNodes = this.renderBuilds();
     const queryNodes = this.renderQueries();
 
-    const IOSStyle = this.state.currentDevice == 'IOS' ? {flex: 1, backgroundColor: '#698dae', cursor: 'pointer'} :
-    {flex: 1, backgroundColor: '#5DADE2', cursor: 'pointer'};
+    const IOSStyle = this.state.currentDevice == 'IOS' ? {flex: 5, backgroundColor: '#698dae', cursor: 'pointer'} :
+    {flex: 5, backgroundColor: '#5DADE2', cursor: 'pointer'};
 
-    const AndroidStyle = this.state.currentDevice == 'Android' ? {flex: 1, backgroundColor: '#698dae', cursor: 'pointer'} :
-    {flex: 1, backgroundColor: '#5DADE2', cursor: 'pointer'};
+    const AndroidStyle = this.state.currentDevice == 'Android' ? {flex: 5, backgroundColor: '#698dae', cursor: 'pointer'} :
+    {flex: 5, backgroundColor: '#5DADE2', cursor: 'pointer'};
 
     return (
       <div>
@@ -494,7 +494,7 @@ export class VersionHistory extends React.Component {
         </div>
 
         <div className="qms-title-bar">
-        <div className="platform-title" style={{flex: 1, backgroundColor: '#5DADE2', cursor: 'pointer'}}>
+        <div className="platform-title" style={{flex: 4, backgroundColor: '#5DADE2', cursor: 'pointer'}}>
           Platform:
         </div>
             <div className="history-title" style={IOSStyle}
@@ -530,7 +530,7 @@ export class VersionHistory extends React.Component {
           <div className="qms-title" style={{flex: 1, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
               build#
           </div>
-          <div className="history-title" style={{flex: 5, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
+          <div className="history-title-left" style={{flex: 5, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
               queries (signature)
           </div>
 

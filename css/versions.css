@@ -45,9 +45,9 @@
     flex: 1;
     padding: 5px;
     position: relative;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    justify-content: left;
+    align-items: left;
+    text-align: left;
 }
 
 .versions-row-buttons {
@@ -148,6 +148,17 @@
   overflow-x: hidden;
   padding: 10px 0 10px 10px;
   text-align: center;
+  text-overflow: ellipsis;
+  user-select: initial;
+  white-space: nowrap;
+}
+
+.history-title-left {
+  flex: 1;
+  font-weight: bold;
+  overflow-x: hidden;
+  padding: 10px 0 10px 10px;
+  text-align: left;
   text-overflow: ellipsis;
   user-select: initial;
   white-space: nowrap;
