@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 function getUrl(paramStr) {
-    var host = 'http://www.houzztest.com/api?';
+    var host = 'http://www.stghouzz.com/api?';
     const env = process.env.NODE_ENV;
     switch (env) {
         case 'dev':
