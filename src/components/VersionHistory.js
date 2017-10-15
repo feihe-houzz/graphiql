@@ -41,7 +41,8 @@ export class VersionHistory extends React.Component {
        currentQueries:[],
        build2ClientId:[],
        copied: false,
-       currentDevice: ''
+       currentDevice: '',
+       initialized: false
     };
   }
 
@@ -473,6 +474,16 @@ export class VersionHistory extends React.Component {
   }
 
   render() {
+
+    // if (!this.state.initialized) {
+    //     this.setState({
+    //         initialized: true,
+    //         currentPlatform: 0,
+    //         currentDevice: 'IOS',
+    //     })
+    //     this.getGQLClients(0)
+    //     this.getCurrentQueries(0);
+    // }
 
     const versionNodes = this.renderVersions();
     const buildNodes = this.renderBuilds();

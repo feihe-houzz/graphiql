@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 
 function getUrl(paramStr) {
     var host = 'https://www.stghouzz.com/api?';
+    // var host = 'http://www.houzztest.com/api?';
     const env = process.env.NODE_ENV;
     switch (env) {
         case 'dev':
@@ -26,7 +27,6 @@ function fetchUrl(url, headers) {
         return res.json();
     });
 }
-
 
 
 module.exports = {
