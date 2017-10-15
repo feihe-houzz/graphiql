@@ -100,7 +100,7 @@ export class VersionHistory extends React.Component {
         this.getCurrentQueries(this.state.currentBuildIdx);
         this.toast('Updated', 'success');
       }).catch((err) => {
-        // console.log(err);
+        console.log(err);
         this.toast(err.name, 'error');
       });
   }
@@ -252,11 +252,13 @@ export class VersionHistory extends React.Component {
       var headers = {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'compress': false,
       };
 
       apiHelper.fetchUrl(url, headers).then(json => {
           this.retrieveInfoFromRes(json);
       }).catch((err) => {
+          console.log(err);
           this.toast(err.name, 'error');
       });
   }
@@ -292,6 +294,7 @@ export class VersionHistory extends React.Component {
          );
          return gqls;
      }).catch((err) => {
+        console.log(err);
         this.toast(err.name, 'error');
      });
  }
