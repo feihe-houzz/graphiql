@@ -97,13 +97,15 @@ export class VersionHistory extends React.Component {
 
       var url = apiHelper.getUrl('app=test1&version=' + curVersionNum + '&method=uploadGQL&format=json&dateFormat=sec&req=P&signature=' + oldSignature + '&platform=' + curPlatform + '&build=' + curBuildNum);
       fetch(url, headers).then(res => {
-        // console.log(res);
+        console.log(res);
         this.getCurrentQueries(this.state.currentBuildIdx);
         this.toast('Updated', 'success');
       }).catch((err) => {
         console.log(err);
         this.toast(err.name, 'error');
       });
+
+
   }
 
   retrieveInfoFromRes(res) {
@@ -173,9 +175,26 @@ export class VersionHistory extends React.Component {
           build2ClientId: buildToClientId,
           version2Builds: versionToBuilds,
       });
+
+      this.getCurrentQueries(0);
+      if (this.state.initialized == false) {
+          this.setState({
+            initialized: true,
+          });
+      }
   }
 
   componentDidMount() {
+  }
+
+  componentWillMount() {
+    if (!this.state.initialized) {
+        this.setState({
+            currentPlatform: 0,
+            currentDevice: 'IOS',
+        })
+        this.getGQLClients(0);
+    }
   }
 
   componentDidUpdate() {
@@ -210,6 +229,7 @@ export class VersionHistory extends React.Component {
   }
 
   getCurrentQueries(buildIdx) {
+      console.log("-----------> current build index: " , buildIdx);
       this.setState(
         {
             currentBuildIdx: buildIdx,
@@ -218,6 +238,34 @@ export class VersionHistory extends React.Component {
       );
 
       var buildsArr = this.state.version2Builds[this.state.currentVersionIdx].builds;
+      // console.log("buildsArr",JSON.stringify(buildsArr));
+      var buildId = buildsArr[buildIdx].id;
+      // console.log("buildsID", buildId);
+
+      let clientId;
+      // get clientID
+      this.state.build2ClientId.forEach((elem) => {
+          if (elem.build === buildId) {
+            clientId = elem.clientId;
+          }
+      });
+
+      this.getGQLsByClientId(clientId);
+      // console.log("clientId ==>", clientId);
+  }
+
+
+  getCurrentQueries2(versionIdx, buildIdx) {
+      console.log("-----------> current build index: " , buildIdx);
+      this.setState(
+        {
+            currentBuildIdx: buildIdx,
+            shouldUpdateQueryEditor: true,
+            currentQueryIdx: 0
+        }
+      );
+
+      var buildsArr = this.state.version2Builds[versionIdx].builds;
       // console.log("buildsArr",JSON.stringify(buildsArr));
       var buildId = buildsArr[buildIdx].id;
       // console.log("buildsID", buildId);
@@ -257,6 +305,7 @@ export class VersionHistory extends React.Component {
       };
 
       apiHelper.fetchUrl(url, headers).then(json => {
+          console.log("------> getGQLClients json: ", json);
           this.retrieveInfoFromRes(json);
       }).catch((err) => {
           console.log(err);
@@ -324,13 +373,18 @@ export class VersionHistory extends React.Component {
       } : null;
 
       // console.log('version id: ', elem.version);
-
       return (
         <div key={i} className="versions-row-query"
-            onClick={() => this.setState({
+            onClick={() => {
+              this.setState({
                 currentVersionIdx: i,
                 shouldUpdateQueryEditor: true,
-            })} style={style}>
+                currentBuildIdx: 0,
+                currentQueries: this.getCurrentQueries2(i, 0)
+              })
+
+            }
+          } style={style}>
              {elem.version}
         </div>
       );
@@ -434,7 +488,6 @@ export class VersionHistory extends React.Component {
   }
 
   renderQueries() {
-
     var currentQueries = this.state.currentQueries;
     if (currentQueries == undefined || currentQueries.length == 0) {
       return ;
@@ -474,17 +527,6 @@ export class VersionHistory extends React.Component {
   }
 
   render() {
-
-    // if (!this.state.initialized) {
-    //     this.setState({
-    //         initialized: true,
-    //         currentPlatform: 0,
-    //         currentDevice: 'IOS',
-    //     })
-    //     this.getGQLClients(0)
-    //     this.getCurrentQueries(0);
-    // }
-
     const versionNodes = this.renderVersions();
     const buildNodes = this.renderBuilds();
     const queryNodes = this.renderQueries();
