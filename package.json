@@ -46,6 +46,7 @@
     "jsonpath": "^0.2.11",
     "lodash": "^4.17.4",
     "marked": "0.3.6",
+    "md5": "^2.2.1",
     "react": "^15.5.4",
     "react-copy-to-clipboard": "^5.0.0",
     "react-toastr": "^2.8.2",

@@ -8,7 +8,7 @@ import _ from 'lodash';
 var ReactToastr = require("react-toastr");
 var {ToastContainer} = ReactToastr; // This is a React Element.
 import apiHelper from '../utility/apiHelper';
-import md5 from 'php-md5';
+import md5 from 'md5';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import fetch from 'node-fetch';
 

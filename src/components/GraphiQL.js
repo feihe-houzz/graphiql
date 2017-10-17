@@ -456,7 +456,7 @@ export class GraphiQL extends React.Component {
             onMouseDown={this.handleDocsResizeStart}
           />
           <ParserExplorer
-            ref={c => { this.docExplorerComponent = c; }}
+            ref={c => { this.ParserExplorerComponent = c; }}
             schema={this.state.schema}
             result={this.state.response}
             >
@@ -667,6 +667,7 @@ export class GraphiQL extends React.Component {
 
   handleClickReference = reference => {
     this.setState({ docExplorerOpen: true }, () => {
+      console.log('docExplorerComponent: ', this.docExplorerComponent);
       this.docExplorerComponent.showDocForReference(reference);
     });
   }
