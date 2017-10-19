@@ -317,7 +317,7 @@ export class GraphiQL extends React.Component {
 
     const versionPaneStyle = {
       display: this.state.versionPaneOpen ? 'block' : 'none',
-      width: '500px',
+      width: '400px',
       zIndex: '7'
     };
 

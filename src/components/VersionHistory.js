@@ -32,39 +32,72 @@ export class VersionHistory extends React.Component {
     super(props);
     this.state = {
        currentVersionIdx: 0,
-       currentBuildIdx:0,
        currentQuery: 0,
        currentQueryIdx: 0,
        currentPlatform: 0,
        shouldUpdateQueryEditor: false,
-       version2Builds:[],
        currentQueries:[],
-       build2ClientId:[],
        copied: false,
        currentDevice: '',
-       initialized: false
+       initialized: false,
+       version2ClientId:[]
     };
+  }
+
+  componentDidMount() {
+  }
+
+  componentWillMount() {
+    if (!this.state.initialized) {
+        this.setState({
+            currentPlatform: 0,
+            currentDevice: 'IOS',
+        })
+
+        this.getGQLClients(0);
+        this.setState({
+          initialized: true
+        });
+    }
+  }
+
+  componentDidUpdate() {
+
+    if (this.state.shouldUpdateQueryEditor) {
+        const selectQueryFn = this.props.onSelectQuery;
+        if (!selectQueryFn) {
+            return;
+        }
+
+        var hasChosen = false;
+
+        if (this.state.currentQueries === undefined || this.state.currentQueries.length === 0) {
+            return ;
+        }
+        this.state.currentQueries.map((query, i) => {
+
+          const chosen = i === this.state.currentQueryIdx;
+
+          if (chosen) {
+            hasChosen = true;
+            var queryValue = query.value ? query.value : null;
+            selectQueryFn(StripIndent(queryValue), '', query.name); // notify parent
+          }
+        });
+
+        if (!hasChosen) {
+            // no match query found for this version, reset the query editor
+            selectQueryFn('', '', ''); // notify parent
+        }
+
+        this.setState({shouldUpdateQueryEditor: false});
+    }
   }
 
   generateSignature(query) {
       query = query.replace("\r","");
       let signature = md5(query);
       return signature;
-  }
-
-  getCurBuildNum() {
-    if (this.state.version2Builds === undefined || this.state.version2Builds.length == 0) {
-      return -1;
-    }
-    // console.log("************************");
-    // console.log(this.state.version2Builds);
-    var buildsArr = this.state.version2Builds[this.state.currentVersionIdx].builds;
-    // console.log("buildsArr",JSON.stringify(buildsArr));
-    // console.log(this.state.currentBuildIdx);
-    // console.log("========================");
-    var buildNum = buildsArr[this.state.currentBuildIdx].id;
-    // console.log("buildsID", buildNum);
-    return buildNum;
   }
 
   updateGQLs() {
@@ -90,206 +123,81 @@ export class VersionHistory extends React.Component {
         body: editedQuery,
       };
 
-      let curBuildNum = this.getCurBuildNum();
-      let curVersionNum = this.state.version2Builds[this.state.currentVersionIdx].version;
+      let curVersion = this.state.version2ClientId[this.state.currentVersionIdx].version;
+      console.log("currentVersion: ", curVersion);
       let oldSignature = this.state.currentQueries[this.state.currentQueryIdx].signature;
       let curPlatform = this.state.currentPlatform;
 
-      var url = apiHelper.getUrl('app=test1&version=' + curVersionNum + '&method=uploadGQL&format=json&dateFormat=sec&req=P&signature=' + oldSignature + '&platform=' + curPlatform + '&build=' + curBuildNum);
+      var url = apiHelper.getUrl('app=test1&version=' + curVersion + '&method=uploadGQL&format=json&dateFormat=sec&req=P&signature=' + oldSignature + '&platform=' + curPlatform);
+      console.log("url: ", url);
+      console.log("editedQuery", editedQuery);
       fetch(url, headers).then(res => {
         console.log(res);
-        this.getCurrentQueries(this.state.currentBuildIdx);
+        this.getCurrentQueries(this.state.currentVersionIdx);
         this.toast('Updated', 'success');
       }).catch((err) => {
         console.log(err);
         this.toast(err.name, 'error');
       });
-
-
   }
 
   retrieveInfoFromRes(res) {
-      let versionToBuilds = [];
-      let buildToClientId = [];
 
+      let versionToClientId = [];
       for (let key in res.Clients) {
           let elem = res.Clients[key];
 
           let curVersion = elem.version;
-          let curBuild = elem.build;
           let curClidntId = elem.client_id;
 
-          let idx;
-          // check whether the curVersion exists
-          for (let i in versionToBuilds) {
-              let elemVB = versionToBuilds[i];
-              // console.log(elemVB);
-              if (elemVB.version === curVersion) {
-                  idx = i;
-                  break;
-              }
-          }
-
-          if (idx === undefined) {
-              // this version doesn't exists
-              let elembuild = [];
-              elembuild.push({
-                "id": curBuild
-              });
-
-              let e = {
-                  "version": curVersion,
-                  "builds": elembuild
-              };
-
-              versionToBuilds.push(e);
-          } else {
-              // this version already exist
-              versionToBuilds[idx].builds.push(
-                {"id": curBuild}
-              );
-          }
-
-          buildToClientId.push({
-              "build": curBuild,
-              "clientId": curClidntId
-          });
+          let e = {
+            "version": curVersion,
+            "clientId": curClidntId
+          };
+          versionToClientId.push(e);
       }
 
-      // console.log("=============");
-      // console.log(JSON.stringify(versionToBuilds));
-
       // sort by version in descreading order
-      versionToBuilds.sort((a,b) => {
-          return b.version - a.version;
-      });
+      versionToClientId.sort((a,b) => {
+          var a1 = a.version.split('.');
+          var b1 = b.version.split('.');
+          var len = Math.max(a1.length, b1.length);
 
-      // sort build for each version
-      versionToBuilds.forEach(elem => {
-          elem.builds.sort((a, b) => {
-              return b.id - a.id;
-          });
+          for(var i = 0; i< len; i++){
+              var _a = +a1[i] || 0;
+              var _b = +b1[i] || 0;
+              if(_a === _b) continue;
+              else return _a > _b ? -1 : 1;
+          }
+          return 0;
       });
 
       this.setState({
-          build2ClientId: buildToClientId,
-          version2Builds: versionToBuilds,
+          version2ClientId: versionToClientId
       });
 
       this.getCurrentQueries(0);
-      if (this.state.initialized == false) {
-          this.setState({
-            initialized: true,
-          });
-      }
   }
 
-  componentDidMount() {
-  }
-
-  componentWillMount() {
-    if (!this.state.initialized) {
-        this.setState({
-            currentPlatform: 0,
-            currentDevice: 'IOS',
-        })
-        this.getGQLClients(0);
-    }
-  }
-
-  componentDidUpdate() {
-
-    if (this.state.shouldUpdateQueryEditor) {
-        const selectQueryFn = this.props.onSelectQuery;
-        if (!selectQueryFn) {
-            return;
-        }
-
-        var hasChosen = false;
-
-        // this.state.versions[this.state.currentVersionIdx].queries.map((query, i) => {
-        this.state.currentQueries.map((query, i) => {
-
-          const chosen = i === this.state.currentQueryIdx;
-
-          if (chosen) {
-            hasChosen = true;
-            var queryValue = query.value ? query.value : null;
-            selectQueryFn(StripIndent(queryValue), '', query.name); // notify parent
-          }
-        });
-
-        if (!hasChosen) {
-            // no match query found for this version, reset the query editor
-            selectQueryFn('', '', ''); // notify parent
-        }
-
-        this.setState({shouldUpdateQueryEditor: false});
-    }
-  }
-
-  getCurrentQueries(buildIdx) {
-      console.log("-----------> current build index: " , buildIdx);
+  getCurrentQueries(versionIdx) {
       this.setState(
         {
-            currentBuildIdx: buildIdx,
             shouldUpdateQueryEditor: true,
         }
       );
 
-      var buildsArr = this.state.version2Builds[this.state.currentVersionIdx].builds;
-      // console.log("buildsArr",JSON.stringify(buildsArr));
-      var buildId = buildsArr[buildIdx].id;
-      // console.log("buildsID", buildId);
-
-      let clientId;
-      // get clientID
-      this.state.build2ClientId.forEach((elem) => {
-          if (elem.build === buildId) {
-            clientId = elem.clientId;
-          }
-      });
-
+      let elem = this.state.version2ClientId[versionIdx];
+      let clientId = this.state.version2ClientId[versionIdx].clientId;
       this.getGQLsByClientId(clientId);
-      // console.log("clientId ==>", clientId);
   }
 
-
-  getCurrentQueries2(versionIdx, buildIdx) {
-      console.log("-----------> current build index: " , buildIdx);
-      this.setState(
-        {
-            currentBuildIdx: buildIdx,
-            shouldUpdateQueryEditor: true,
-            currentQueryIdx: 0
-        }
-      );
-
-      var buildsArr = this.state.version2Builds[versionIdx].builds;
-      // console.log("buildsArr",JSON.stringify(buildsArr));
-      var buildId = buildsArr[buildIdx].id;
-      // console.log("buildsID", buildId);
-
-      let clientId;
-      // get clientID
-      this.state.build2ClientId.forEach((elem) => {
-          if (elem.build === buildId) {
-            clientId = elem.clientId;
-          }
-      });
-
-      this.getGQLsByClientId(clientId);
-      // console.log("clientId ==>", clientId);
-  }
-
+  // get getGQLClients by platform
   getGQLClients(platform) {
       this.setState(
         {
-          version2Builds:[],
+          version2ClientId:[],
           currentQueries:[],
-          build2ClientId:[],
           currentVersionIdx: 0,
-          currentBuildIdx: 0
         }
       );
 
@@ -313,6 +221,7 @@ export class VersionHistory extends React.Component {
       });
   }
 
+  // get GQLs by client id
   getGQLsByClientId(clientId) {
      var url = apiHelper.getUrl('app=test1&version=180&method=getGQLs&format=json&dateFormat=sec&clientid='+clientId);
      console.log(url);
@@ -342,6 +251,8 @@ export class VersionHistory extends React.Component {
              shouldUpdateQueryEditor: true
            }
          );
+        //  console.log("-----current queries");
+        //  console.log(gqls);
          return gqls;
      }).catch((err) => {
         console.log(err);
@@ -364,12 +275,10 @@ export class VersionHistory extends React.Component {
  }
 
  renderVersions() {
-    // console.log('currentVersionIdx: ', this.state.currentVersionIdx);
-    // console.log('!!!version2Builds', this.state.version2Builds);
-    return this.state.version2Builds.map((elem, i) => {
+    return this.state.version2ClientId.map((elem, i) => {
       const chosen = i === this.state.currentVersionIdx;
       const style = chosen ? {
-        backgroundColor: '#A9A9A9'
+        backgroundColor: '#A9A9A9',
       } : null;
 
       // console.log('version id: ', elem.version);
@@ -378,45 +287,14 @@ export class VersionHistory extends React.Component {
             onClick={() => {
               this.setState({
                 currentVersionIdx: i,
+                currentQueryIdx: 0,
                 shouldUpdateQueryEditor: true,
-                currentBuildIdx: 0,
-                currentQueries: this.getCurrentQueries2(i, 0)
+                currentQueries: this.getCurrentQueries(i)
               })
-
             }
           } style={style}>
              {elem.version}
         </div>
-      );
-    });
-  }
-
-  renderBuilds() {
-    // console.log('currentVersionIdx: ', this.state.currentVersionIdx);
-    var currentBuilds = this.state.version2Builds[this.state.currentVersionIdx];
-    // console.log('version2Builds', JSON.stringify(this.state.version2Builds));
-    // console.log('currentBuilds', JSON.stringify(currentBuilds));
-    if (currentBuilds == undefined || currentBuilds.length == 0) {
-        return ;
-    }
-
-    return currentBuilds.builds.map((build, i) => {
-        const chosen = i === this.state.currentBuildIdx;
-        const style = chosen ? {
-            backgroundColor: '#D3D3D3'
-        } : null;
-
-        return (
-            <div key={i} className="versions-row-query"
-                onClick={() => {
-                    this.setState({
-                        currentBuildIdx: i
-                    })
-                    this.getCurrentQueries(i)
-                  }
-                } style={style}>
-                {build.id}
-            </div>
       );
     });
   }
@@ -528,14 +406,15 @@ export class VersionHistory extends React.Component {
 
   render() {
     const versionNodes = this.renderVersions();
-    const buildNodes = this.renderBuilds();
     const queryNodes = this.renderQueries();
 
-    const IOSStyle = this.state.currentDevice == 'IOS' ? {flex: 5, backgroundColor: '#698dae', cursor: 'pointer'} :
-    {flex: 5, backgroundColor: '#5DADE2', cursor: 'pointer'};
+    const IOSStyle = this.state.currentDevice == 'IOS' ?
+        {flex: 4, backgroundColor: '#698dae', cursor: 'pointer'} :
+        {flex: 4, backgroundColor: '#5DADE2', cursor: 'pointer'};
 
-    const AndroidStyle = this.state.currentDevice == 'Android' ? {flex: 5, backgroundColor: '#698dae', cursor: 'pointer'} :
-    {flex: 5, backgroundColor: '#5DADE2', cursor: 'pointer'};
+    const AndroidStyle = this.state.currentDevice == 'Android' ?
+        {flex: 4, backgroundColor: '#698dae', cursor: 'pointer'} :
+        {flex: 4, backgroundColor: '#5DADE2', cursor: 'pointer'};
 
     return (
       <div>
@@ -547,7 +426,7 @@ export class VersionHistory extends React.Component {
         </div>
 
         <div className="qms-title-bar">
-        <div className="platform-title" style={{flex: 4, backgroundColor: '#5DADE2', cursor: 'pointer'}}>
+        <div className="platform-title" style={{flex: 2, backgroundColor: '#5DADE2', cursor: 'pointer'}}>
           Platform:
         </div>
             <div className="history-title" style={IOSStyle}
@@ -561,7 +440,6 @@ export class VersionHistory extends React.Component {
                     }
                 }>
               IOS
-              <i class="fa fa-apple" aria-hidden="false"></i>
             </div>
             <div className="history-title" style={AndroidStyle}
                 onClick={
@@ -580,10 +458,7 @@ export class VersionHistory extends React.Component {
           <div className="qms-title" style={{flex: 1, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
               version#
           </div>
-          <div className="qms-title" style={{flex: 1, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
-              build#
-          </div>
-          <div className="history-title-left" style={{flex: 5, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
+          <div className="history-title-left" style={{flex: 4, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
               queries (signature)
           </div>
 
@@ -592,9 +467,6 @@ export class VersionHistory extends React.Component {
         <div className="versions-contents">
             <div className="versions-version">
               {versionNodes}
-            </div>
-            <div className="versions-build">
-              {buildNodes}
             </div>
             <div className="versions-queries">
               {queryNodes}

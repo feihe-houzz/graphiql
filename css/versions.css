@@ -25,18 +25,10 @@
     flex: 1;
     background-color: #f5f5f5;
     cursor: pointer;
-    text-align: center;
-}
-
-.versions-build {
-    flex: 1;
-    background-color: #ffffff;
-    cursor: pointer;
-    text-align: center;
 }
 
 .versions-queries {
-    flex: 5;
+    flex: 4;
     background-color: #f5f5f5;
     cursor: pointer;
 }
