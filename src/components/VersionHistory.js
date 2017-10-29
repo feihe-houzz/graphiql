@@ -26,6 +26,7 @@ export class VersionHistory extends React.Component {
     queryID: PropTypes.number,
     onSelectQuery: PropTypes.func,
     storage: PropTypes.object,
+    selected: PropTypes.string,
   }
 
   constructor(props) {
@@ -48,7 +49,11 @@ export class VersionHistory extends React.Component {
   }
 
   componentWillMount() {
-    if (!this.state.initialized) {
+
+  }
+
+  componentDidUpdate() {
+    if (this.props.selected != undefined && this.props.selected && !this.state.initialized) {
         this.setState({
             currentPlatform: 0,
             currentDevice: 'IOS',
@@ -59,10 +64,6 @@ export class VersionHistory extends React.Component {
           initialized: true
         });
     }
-  }
-
-  componentDidUpdate() {
-
     if (this.state.shouldUpdateQueryEditor) {
         const selectQueryFn = this.props.onSelectQuery;
         if (!selectQueryFn) {
@@ -244,16 +245,18 @@ export class VersionHistory extends React.Component {
              gqls.push(e);
          }
 
+         if (gqls.length != 0) {
+            this.setState(
+            {
+               currentQueries: gqls,
+               shouldUpdateQueryEditor: true
+            });
+         }
         //  console.log("gqls=> ", gqls);
-         this.setState(
-           {
-             currentQueries: gqls,
-             shouldUpdateQueryEditor: true
-           }
-         );
+
         //  console.log("-----current queries");
         //  console.log(gqls);
-         return gqls;
+
      }).catch((err) => {
         console.log(err);
         this.toast(err.name, 'error');
@@ -419,7 +422,7 @@ export class VersionHistory extends React.Component {
     return (
       <div>
         <div className="history-title-bar">
-          <div className="history-title">Query Management System (QMS)</div>
+          <div className="history-title">Persisted Queries</div>
           <div className="doc-explorer-rhs">
             {this.props.children}
           </div>

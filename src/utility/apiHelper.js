@@ -1,24 +1,15 @@
 import fetch from 'node-fetch';
+var urlUtil = require('url');
+
 
 function getUrl(paramStr) {
-    var host = 'https://www.stghouzz.com/api?';
-    // var host = 'http://www.houzztest.com/api?';
-    const env = process.env.NODE_ENV;
-    switch (env) {
-        case 'dev':
-            host = host.replace('houzz', 'stghouzz');
-            break;
-        case 'staging':
-            host = host.replace('houzz', 'stghouzz');
-            break;
-        case 'houzz2':
-            host = host.replace('houzz', 'houzz2');
-            break;
-    }
-
-    const url = host + paramStr;
-    console.log('=> url: ', url);
-    return url;
+    var url = window.location.href;
+    var urlObject = urlUtil.parse(url);
+    var host = urlObject.host;
+    var protocol = urlObject.protocol;
+    const cur_url = protocol + "//" + host + "/api?" + paramStr;
+    console.log("my_cur_url", cur_url);
+    return cur_url;
 }
 
 function fetchUrl(url, headers) {
@@ -27,7 +18,6 @@ function fetchUrl(url, headers) {
         return res.json();
     });
 }
-
 
 module.exports = {
     getUrl,

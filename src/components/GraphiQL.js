@@ -286,7 +286,7 @@ export class GraphiQL extends React.Component {
         <ToolbarButton
           onClick={this.handleToggleVersions}
           title="Query Management System"
-          label="QMS"
+          label="Persisted Queries"
         />
 
       </GraphiQL.Toolbar>;
@@ -353,7 +353,10 @@ export class GraphiQL extends React.Component {
             variables={this.state.variables}
             onSelectQuery={this.replaceQuery.bind(this)}
             storage={this._storage}
-            queryID={this._editorQueryID}>
+            queryID={this._editorQueryID}
+            selected={this.state.versionPaneOpen}
+            >
+
             <div className="docExplorerHide" onClick={this.handleToggleVersions}>
               {'\u2715'}
             </div>
