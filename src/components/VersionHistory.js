@@ -129,7 +129,7 @@ export class VersionHistory extends React.Component {
       let oldSignature = this.state.currentQueries[this.state.currentQueryIdx].signature;
       let curPlatform = this.state.currentPlatform;
 
-      var url = apiHelper.getUrl('app=test1&version=' + curVersion + '&method=uploadGQL&format=json&dateFormat=sec&req=P&signature=' + oldSignature + '&platform=' + curPlatform);
+      var url = apiHelper.getUrl('app=test1&release=' + curVersion + '&method=uploadGQL&format=json&dateFormat=sec&req=P&signature=' + oldSignature + '&platform=' + curPlatform);
       console.log("url: ", url);
       console.log("editedQuery", editedQuery);
       fetch(url, headers).then(res => {
@@ -459,7 +459,7 @@ export class VersionHistory extends React.Component {
         </div>
         <div className="qms-title-bar">
           <div className="qms-title" style={{flex: 1, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
-              version#
+              release#
           </div>
           <div className="history-title-left" style={{flex: 4, backgroundColor: '#87CEEB', cursor: 'pointer'}}>
               queries (signature)
