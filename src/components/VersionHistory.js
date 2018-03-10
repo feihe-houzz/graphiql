@@ -11,6 +11,8 @@ import apiHelper from '../utility/apiHelper';
 import md5 from 'md5';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import fetch from 'node-fetch';
+import CJSON from 'circular-json';
+var urlUtil = require('url');
 
 // For Non ES6...
 // var ToastContainer = ReactToastr.ToastContainer;
@@ -101,6 +103,39 @@ export class VersionHistory extends React.Component {
       return signature;
   }
 
+  checkPQEditPermission() {
+      var url = window.location.href;
+      var urlObject = urlUtil.parse(url);
+      var host = urlObject.host;
+      var protocol = urlObject.protocol;
+
+      let curUrl = protocol + "//" + host + "/j/graphiql-auth?auth=editGraphouzzPQ";
+      var headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'compress': false,
+      };
+
+      return apiHelper.fetchUrl(curUrl, headers).then(json => {
+          return json;
+      }).catch((err) => {
+        //   console.log(err);
+          this.toast(err.name, 'error');
+      });
+  }
+
+  updateGQLsWithPQPermission() {
+      let checkPQEditPermissionPromise = this.checkPQEditPermission();
+      checkPQEditPermissionPromise.then(res => {
+        //   console.log('~~~ json: ', res);
+         if (res.status === 0) {
+             this.updateGQLs();
+         } else {
+             this.toast('No Permission to Edit', 'error');
+         }
+      });
+  }
+
   updateGQLs() {
       // get current query from the edited board
       let editedQuery = this.props.query;
@@ -125,19 +160,19 @@ export class VersionHistory extends React.Component {
       };
 
       let curVersion = this.state.version2ClientId[this.state.currentVersionIdx].version;
-      console.log("currentVersion: ", curVersion);
+    //   console.log("currentVersion: ", curVersion);
       let oldSignature = this.state.currentQueries[this.state.currentQueryIdx].signature;
       let curPlatform = this.state.currentPlatform;
 
       var url = apiHelper.getUrl('app=test1&release=' + curVersion + '&method=uploadGQL&format=json&dateFormat=sec&req=P&signature=' + oldSignature + '&platform=' + curPlatform);
-      console.log("url: ", url);
-      console.log("editedQuery", editedQuery);
+    //   console.log("url: ", url);
+    //   console.log("editedQuery", editedQuery);
       fetch(url, headers).then(res => {
-        console.log(res);
+        // console.log(res);
         this.getCurrentQueries(this.state.currentVersionIdx);
         this.toast('Updated', 'success');
       }).catch((err) => {
-        console.log(err);
+        // console.log(err);
         this.toast(err.name, 'error');
       });
   }
@@ -173,11 +208,13 @@ export class VersionHistory extends React.Component {
           return 0;
       });
 
-      this.setState({
-          version2ClientId: versionToClientId
-      });
+      if (versionToClientId && versionToClientId.length) {
+          this.setState({
+              version2ClientId: versionToClientId
+          });
 
-      this.getCurrentQueries(0);
+          this.getCurrentQueries(0);
+      }
   }
 
   getCurrentQueries(versionIdx) {
@@ -205,7 +242,7 @@ export class VersionHistory extends React.Component {
       var query = this.props.query;
 
       var url = apiHelper.getUrl('app=test1&version=180&method=getGQLClients&format=json&platform=' + platform);
-      console.log(url);
+    //   console.log(url);
 
       var headers = {
           'Accept': 'application/json',
@@ -217,7 +254,7 @@ export class VersionHistory extends React.Component {
           console.log("------> getGQLClients json: ", json);
           this.retrieveInfoFromRes(json);
       }).catch((err) => {
-          console.log(err);
+        //   console.log(err);
           this.toast(err.name, 'error');
       });
   }
@@ -225,7 +262,7 @@ export class VersionHistory extends React.Component {
   // get GQLs by client id
   getGQLsByClientId(clientId) {
      var url = apiHelper.getUrl('app=test1&version=180&method=getGQLs&format=json&dateFormat=sec&clientid='+clientId);
-     console.log(url);
+    //  console.log(url);
 
      var headers = {
          'Accept': 'application/json',
@@ -258,7 +295,7 @@ export class VersionHistory extends React.Component {
         //  console.log(gqls);
 
      }).catch((err) => {
-        console.log(err);
+        // console.log(err);
         this.toast(err.name, 'error');
      });
  }
@@ -276,6 +313,8 @@ export class VersionHistory extends React.Component {
      let curQuery = this.state.currentQueries[curIdx];
      return curQuery.signature;
  }
+
+
 
  renderVersions() {
     return this.state.version2ClientId.map((elem, i) => {
@@ -347,7 +386,8 @@ export class VersionHistory extends React.Component {
                style={{flex: 1, justifyContent: 'center', borderRight: '2px solid gray', color: '#3C9450', fontSize: '20px'}}
                title="Save Updated GQL"
                onClick={() => {
-                    this.updateGQLs();
+                    // this.updateGQLs();
+                    this.updateGQLsWithPQPermission();
                 }}></i>
 
                 <CopyToClipboard text={this.getCurrentSignature()}

@@ -8,7 +8,6 @@ function getUrl(paramStr) {
     var host = urlObject.host;
     var protocol = urlObject.protocol;
     const cur_url = protocol + "//" + host + "/api?" + paramStr;
-    console.log("my_cur_url", cur_url);
     return cur_url;
 }
 
