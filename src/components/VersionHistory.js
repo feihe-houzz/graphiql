@@ -178,10 +178,14 @@ export class VersionHistory extends React.Component {
   }
 
   retrieveInfoFromRes(res) {
-
       let versionToClientId = [];
       for (let key in res.Clients) {
           let elem = res.Clients[key];
+
+          // ignore the test clients, the test queries won't show on the tool
+          if (elem && elem.is_test === '1') {
+              continue;
+          }
 
           let curVersion = elem.version;
           let curClidntId = elem.client_id;
@@ -190,6 +194,7 @@ export class VersionHistory extends React.Component {
             "version": curVersion,
             "clientId": curClidntId
           };
+
           versionToClientId.push(e);
       }
 
@@ -251,7 +256,7 @@ export class VersionHistory extends React.Component {
       };
 
       apiHelper.fetchUrl(url, headers).then(json => {
-          console.log("------> getGQLClients json: ", json);
+        //   console.log("------> getGQLClients json: ", json);
           this.retrieveInfoFromRes(json);
       }).catch((err) => {
         //   console.log(err);
