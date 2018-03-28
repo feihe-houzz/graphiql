@@ -22,6 +22,7 @@ export class UnitTestAutoGen extends React.Component {
         super(props);
         this.state = {
             isMobile: false,
+            needAuth: false,
             unitTestOutput: 'The unit test for this Query will be generated here'
         };
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -31,8 +32,8 @@ export class UnitTestAutoGen extends React.Component {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-        // console.log('>>>> name: ', name);
-        // console.log('&&&& value: ', value);
+        console.log('>>>> name: ', name);
+        console.log('&&&& value: ', value);
 
         this.setState({
             [name]: value
@@ -53,29 +54,42 @@ export class UnitTestAutoGen extends React.Component {
         let curOperationName = this.props.operationName;
         let curResult =  JSON.stringify(res.data);
 
+        // delete _gtrace
+        delete res._gtrace;
+
         let curReq = {
             query: curQuery,
             variables: curVariables,
             operationName: curOperationName
         };
 
-        let curRes = {
-            data: res.data
-        };
+        let curRes = res;
 
         let unitTest = JSON.stringify(curReq, null, 4) + ',\n' + JSON.stringify(curRes, null, 4);
 
+        let options = {};
+
         if (this.state.isMobile) {
-            let needAuth = {
-                needsAuthentication: true
-            };
-            unitTest = unitTest + ',\n' + JSON.stringify(needAuth, null, 4);
+            _.extend(options, {isMobile: true});
         }
 
+        if (this.state.needAuth) {
+            _.extend(options, {needsAuthentication: true});
+        }
+
+        console.log('$$$$$ options: ', JSON.stringify(options));
+        // if (JSON.stringify(options) !== '{}') {
+        //     unitTest = unitTest + ',\n' + JSON.stringify(options, null, 4);
+        // }
+        console.log('===>>> Object.getOwnPropertyNames(options).length: ', Object.getOwnPropertyNames(options).length);
+        if (Object.getOwnPropertyNames(options).length !== 0) {
+            unitTest = unitTest + ',\n' + JSON.stringify(options, null, 4);
+        }
         this.setState({
           unitTestOutput: unitTest
         });
     }
+
 
     render() {
         const { show } = this.props;
@@ -95,6 +109,16 @@ export class UnitTestAutoGen extends React.Component {
                             name="isMobile"
                             type="checkbox"
                             checked={this.state.isMobile}
+                            onChange={this.handleInputChange} />
+                    </label>
+                    <label>
+                    </label>
+                    <label>
+                        need Authentication:
+                        <input
+                            name="needAuth"
+                            type="checkbox"
+                            checked={this.state.needAuth}
                             onChange={this.handleInputChange} />
                     </label>
 
