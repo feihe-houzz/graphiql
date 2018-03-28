@@ -6,6 +6,7 @@
 
 import React from 'react';
 import _ from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * Mobile mode and mobile header dialogue
@@ -75,6 +76,9 @@ export class Mobile extends React.Component {
         return (
         <div className="mobile-modal" style={modalStyle}>
             <div className="mobile-modal-content">
+            <span className="close" onClick={() => this.props.onClose()}>
+                &times;
+            </span>
                 <p><b>Mobile mode</b></p>
                 <div style={{ width: '90%', display: 'flex', flexDirection: 'column' }}>
                     {headerFields}

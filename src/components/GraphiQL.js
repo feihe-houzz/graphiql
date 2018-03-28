@@ -16,6 +16,7 @@ import {
   print,
 } from 'graphql';
 
+import { UnitTestAutoGen } from './UnitTestAutoGen';
 import { Mobile } from './Mobile';
 import { ThriftConverter } from './ThriftConverter';
 import { ExecuteButton } from './ExecuteButton';
@@ -130,6 +131,8 @@ export class GraphiQL extends React.Component {
           (this._storage.get('versionPaneOpen') === 'true') || false,
       thriftDiagOpen:
           (this._storage.get('thriftDiagOpen') === 'true') || false,
+      unitTestAutoGenDiagOpen:
+                  (this._storage.get('unitTestAutoGenDiagOpen') === 'true') || false,
       mobileDiagOpen:
           (this._storage.get('mobileDiagOpen') === 'true') || false,
       mobileMode: false,
@@ -288,7 +291,11 @@ export class GraphiQL extends React.Component {
           title="Query Management System"
           label="Persisted Queries"
         />
-
+        <ToolbarButton
+          onClick={this.handleToggleUnitTestAutoGen}
+          title="Unit Test Auto Generation"
+          label="Unit Test Auto-Gen"
+        />
       </GraphiQL.Toolbar>;
 
     const footer = find(children, child => child.type === GraphiQL.Footer);
@@ -330,6 +337,13 @@ export class GraphiQL extends React.Component {
 
     return (
       <div className="graphiql-container">
+        <UnitTestAutoGen
+            operationName={this.state.operationName}
+            query={this.state.query}
+            variables={this.state.variables}
+            response={this.state.response}
+            show={this.state.unitTestAutoGenDiagOpen}
+            onClose={() => this.setState({ unitTestAutoGenDiagOpen: false })} />
         <ThriftConverter show={this.state.thriftDiagOpen} onClose={() => this.setState({ thriftDiagOpen: false })} />
         <Mobile show={this.state.mobileDiagOpen} onClose={() => this.setState({ mobileDiagOpen: false })}
             mobileActivateFn={this.handleMobileActivateFn}/>
@@ -588,15 +602,20 @@ export class GraphiQL extends React.Component {
       if (this.state.schema !== undefined) {
         return;
       }
+      console.log('@@@@@ result: ', result);
+      console.log('&&&& result.data: ', result.data);
 
       if (result && result.data) {
         const schema = buildClientSchema(result.data);
         const queryFacts = getQueryFacts(schema, this.state.query);
+        console.log('***** queryFacts: ', queryFacts);
         this.setState({ schema, ...queryFacts });
       } else {
+
         const responseString = typeof result === 'string' ?
           result :
           JSON.stringify(result, null, 2);
+          console.log('#### responseString: ', responseString);
         this.setState({
           // Set schema to `null` to explicitly indicate that no schema exists.
           schema: null,
@@ -712,6 +731,7 @@ export class GraphiQL extends React.Component {
         operationName,
         headers,
         result => {
+          console.log('>>>>>> result: ', result);
           if (queryID === this._editorQueryID) {
             this.setState({
               isWaitingForResponse: false,
@@ -878,6 +898,11 @@ export class GraphiQL extends React.Component {
   handleToggleThrift = () => {
     this.setState({ thriftDiagOpen: !this.state.thriftDiagOpen });
   }
+
+
+  handleToggleUnitTestAutoGen = () => {
+      this.setState({ unitTestAutoGenDiagOpen: !this.state.unitTestAutoGenDiagOpen });
+    }
 
   handleToggleMobile = () => {
     this.setState({ mobileDiagOpen: !this.state.mobileDiagOpen });
