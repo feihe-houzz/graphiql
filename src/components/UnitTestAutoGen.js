@@ -40,6 +40,16 @@ export class UnitTestAutoGen extends React.Component {
         });
     }
 
+    composeQueryStr(queryObj) {
+        let str = '{' + '\n' +
+        '    ' +  'query: '  +
+        '          ' + '\n\`'+ queryObj.query + '\`'+ ',\n' +
+        '    ' + 'variables: ' + queryObj.variables + ',\n'  +
+        '    ' + 'operationName: ' + '\'' + queryObj.operationName + '\''  +
+        '\n}';
+        return str;
+    }
+
     generateUnitTest() {
         // console.log('@@@@@ this.props.response: ', this.props.response);
         if (!this.props.response) {
@@ -57,6 +67,8 @@ export class UnitTestAutoGen extends React.Component {
         // delete _gtrace
         delete res._gtrace;
 
+        // massage the curQuery string
+        curQuery = curQuery.replace(/\n/g, '\n      ');
         let curReq = {
             query: curQuery,
             variables: curVariables,
@@ -64,9 +76,9 @@ export class UnitTestAutoGen extends React.Component {
         };
 
         let curRes = res;
-
         let unitTest = JSON.stringify(curReq, null, 4) + ',\n' + JSON.stringify(curRes, null, 4);
-
+        let curUnitTest = this.composeQueryStr(curReq) + ',\n' + JSON.stringify(curRes, null, 4);
+        unitTest = curUnitTest;
         let options = {};
 
         if (this.state.isMobile) {
