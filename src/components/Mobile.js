@@ -55,6 +55,10 @@ export class Mobile extends React.Component {
             {
                 name: 'X-HOUZZ-API-SITE-ID',
                 value: '101'
+            },
+            {
+                name: 'X-HOUZZ-API-VISITOR-CONSENTS-TOKEN',
+                value: ''
             }
         ];
     }
