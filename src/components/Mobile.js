@@ -59,6 +59,10 @@ export class Mobile extends React.Component {
             {
                 name: 'X-HOUZZ-API-VISITOR-CONSENTS-TOKEN',
                 value: ''
+            },
+            {
+                name: 'COOKIE',
+                value: ''
             }
         ];
     }
