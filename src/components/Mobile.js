@@ -61,7 +61,7 @@ export class Mobile extends React.Component {
                 value: ''
             },
             {
-                name: 'COOKIE',
+                name: 'MOBILD-COOKIE',
                 value: ''
             }
         ];

@@ -1,6 +1,6 @@
 {
   "name": "graphiql",
-  "version": "0.10.2-37",
+  "version": "0.10.2-40",
   "description": "0.10.2-8 - An graphical interactive in-browser GraphQL IDE.",
   "contributors": [
     "Hyohyeon Jeong <asiandrummer@fb.com>",
@@ -41,8 +41,10 @@
     "testonly": "babel-node ./node_modules/.bin/_mocha $npm_package_options_mocha"
   },
   "dependencies": {
+    "browser-cookies": "^1.2.0",
     "codemirror": "^5.25.2",
     "codemirror-graphql": "0.6.4",
+    "js-cookie": "^2.2.0",
     "jsonpath": "^0.2.11",
     "lodash": "^4.17.4",
     "marked": "0.3.6",

@@ -43,6 +43,8 @@ import {
   introspectionQuery,
   introspectionQuerySansSubscriptions,
 } from '../utility/introspectionQueries';
+var MyCookies = require('browser-cookies');
+var CurCookie = require('js-cookie');
 
 /**
  * The top-level React component for GraphiQL, intended to encompass the entire
@@ -139,6 +141,7 @@ export class GraphiQL extends React.Component {
       docExplorerWidth: Number(this._storage.get('docExplorerWidth')) || 350,
       isWaitingForResponse: false,
       subscription: null,
+      mobileCookieStore: '',
       ...queryFacts
     };
 
@@ -909,12 +912,78 @@ export class GraphiQL extends React.Component {
   }
 
   handleMobileActivateFn = (activated, headers) => {
-    this.setState({
-        mobileDiagOpen: !this.state.mobileDiagOpen,
-        mobileMode: activated
-    });
     this._headers = headers;
+
+    if (activated) {
+        // set mobile cookies
+        let mobileCookie = headers['MOBILD-COOKIE'];
+        let mobileCookieArr = mobileCookie.split(';')
+        mobileCookieArr.forEach(elem => {
+            console.log('$$$$$$: ', elem);
+            if (elem && elem.length > 0) {
+                let elemArr = elem.split('=');
+                let name = elemArr[0];
+                let val = elemArr[1];
+                if (name) {
+                    this.setCookie(name, val, 1);
+                }
+            }
+        });
+        console.log('$$$$ all cookies: ', document.cookie);
+        this.setState({
+            mobileDiagOpen: !this.state.mobileDiagOpen,
+            mobileMode: activated,
+            mobileCookieStore: headers['MOBILD-COOKIE']
+        });
+    } else {
+        // delete mobile cookies
+        console.log('**** disable mobile: ', this.state.mobileCookieStore);
+        let mobileCookies = this.state.mobileCookieStore;
+        let mobileCookiesArr = mobileCookies.split(';');
+        mobileCookiesArr.forEach(elem => {
+            let elemArr = elem.split('=');
+            let name = elemArr[0];
+            this.deleteCookie(name);
+        });
+        this.setState({
+            mobileDiagOpen: !this.state.mobileDiagOpen,
+            mobileMode: activated,
+            mobileCookieStore: ''
+        });
+    }
   }
+
+
+// the cookie helper begins
+  // set cookie
+  setCookie(name,value,days) {
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime()+(days*24*60*60*1000));
+            var expires = "; expires="+date.toGMTString();
+        } else {
+            var expires = "";
+        }
+        document.cookie = name+"="+value+expires+"; path=/";
+    }
+    // delete cookie
+    getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    }
+    // delete cookie
+    deleteCookie(name) {
+        this.setCookie(name,"",-1);
+    }
+// cookie helper ends
+
+
 
   handleResizeStart = downEvent => {
     if (!this._didClickDragBar(downEvent)) {
