@@ -917,7 +917,7 @@ export class GraphiQL extends React.Component {
 
     if (activated) {
         // set mobile cookies
-        let mobileCookie = headers['MOBILD-COOKIE'];
+        let mobileCookie = headers['MOBILE-COOKIE'];
         let mobileCookieArr = mobileCookie.split(';')
         mobileCookieArr.forEach(elem => {
             console.log('$$$$$$: ', elem);
@@ -934,7 +934,7 @@ export class GraphiQL extends React.Component {
         this.setState({
             mobileDiagOpen: !this.state.mobileDiagOpen,
             mobileMode: activated,
-            mobileCookieStore: headers['MOBILD-COOKIE']
+            mobileCookieStore: headers['MOBILE-COOKIE']
         });
     } else {
         // delete mobile cookies

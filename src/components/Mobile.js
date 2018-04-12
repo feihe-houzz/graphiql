@@ -21,8 +21,7 @@ export class Mobile extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-        };
+
         this.headers = [
             {
                 name: 'X-HOUZZ-API-APP-NAME',
@@ -61,24 +60,46 @@ export class Mobile extends React.Component {
                 value: ''
             },
             {
-                name: 'MOBILD-COOKIE',
+                name: 'MOBILE-COOKIE',
                 value: ''
             }
         ];
+
+        this.state = {
+            mobileHeaders: this.headers
+        };
     }
+
+
 
     render() {
         const { show } = this.props;
         var modalStyle = { display: show ? 'block' : 'none'};
 
         var headerFields = [];
-        _.each(this.headers, function(header) {
-            headerFields.push(
-                <div className='mobile-field'>
-                    <div style={{width: '260'}}>{header.name}</div>
-                    <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
-                </div>
-            );
+        _.each(this.state.mobileHeaders, function(header) {
+            // console.log('=====>>>>>>>>>.: ', header);
+            // console.log('----->>>>>>>>>: headerName: ', header.name);
+            // console.log('-----<<<<<<<<<: headerVal: ', header.value);
+
+            if (header.name === 'MOBILE-COOKIE') {
+                headerFields.push(
+                    <div className='mobile-field'>
+                        <div style={{width: '260'}}>{header.name} (Pls start with em)</div>
+                        <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
+                    </div>
+                );
+            } else {
+                headerFields.push(
+
+                    <div className='mobile-field'>
+                        <div style={{width: '260'}}>{header.name}</div>
+                        <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
+                    </div>
+                );
+            }
+
+
         });
 
         return (
@@ -98,7 +119,7 @@ export class Mobile extends React.Component {
                     </div>
                     <div className='mobile-button' onClick={() => {
                             var headers = {}
-                            _.each(this.headers, function(header) {
+                            _.each(this.state.mobileHeaders, function(header) {
                                 headers[header.name] = this.refs[header.name].value;
                             }.bind(this));
                             console.log('headers in mobile: ', headers);
