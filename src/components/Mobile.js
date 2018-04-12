@@ -60,7 +60,7 @@ export class Mobile extends React.Component {
                 value: ''
             },
             {
-                name: 'MOBILE-COOKIE',
+                name: 'COOKIE',
                 value: ''
             }
         ];
@@ -82,10 +82,10 @@ export class Mobile extends React.Component {
             // console.log('----->>>>>>>>>: headerName: ', header.name);
             // console.log('-----<<<<<<<<<: headerVal: ', header.value);
 
-            if (header.name === 'MOBILE-COOKIE') {
+            if (header.name === 'COOKIE') {
                 headerFields.push(
                     <div className='mobile-field'>
-                        <div style={{width: '260'}}>{header.name} (Pls start with em)</div>
+                        <div style={{width: '260'}}>{header.name}</div>
                         <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
                     </div>
                 );

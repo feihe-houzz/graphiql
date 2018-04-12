@@ -917,7 +917,7 @@ export class GraphiQL extends React.Component {
 
     if (activated) {
         // set mobile cookies
-        let mobileCookie = headers['MOBILE-COOKIE'];
+        let mobileCookie = headers['COOKIE'];
         let mobileCookieArr = mobileCookie.split(';')
         mobileCookieArr.forEach(elem => {
             console.log('$$$$$$: ', elem);
@@ -926,7 +926,7 @@ export class GraphiQL extends React.Component {
                 let name = elemArr[0];
                 let val = elemArr[1];
                 if (name) {
-                    cookieHelper.setCookie(name, val, 1);
+                    cookieHelper.overrideOrSetCookie(name, val, 1);
                 }
             }
         });
@@ -934,7 +934,7 @@ export class GraphiQL extends React.Component {
         this.setState({
             mobileDiagOpen: !this.state.mobileDiagOpen,
             mobileMode: activated,
-            mobileCookieStore: headers['MOBILE-COOKIE']
+            mobileCookieStore: headers['COOKIE']
         });
     } else {
         // delete mobile cookies
