@@ -60,16 +60,30 @@ export class Mobile extends React.Component {
                 value: ''
             },
             {
-                name: 'COOKIE',
+                name: 'MOBILE-COOKIE',
                 value: ''
             }
         ];
 
         this.state = {
-            mobileHeaders: this.headers
+            mobileHeaders: this.headers,
+            onlyMobileCookies: true
         };
+        this.handleInputChange = this.handleInputChange.bind(this);
     }
 
+
+    handleInputChange(event) {
+        const target = event.target;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const name = target.name;
+        console.log('>>>> name: ', name);
+        console.log('&&&& value: ', value);
+
+        this.setState({
+            [name]: value
+        });
+    }
 
 
     render() {
@@ -78,28 +92,12 @@ export class Mobile extends React.Component {
 
         var headerFields = [];
         _.each(this.state.mobileHeaders, function(header) {
-            // console.log('=====>>>>>>>>>.: ', header);
-            // console.log('----->>>>>>>>>: headerName: ', header.name);
-            // console.log('-----<<<<<<<<<: headerVal: ', header.value);
-
-            if (header.name === 'COOKIE') {
-                headerFields.push(
-                    <div className='mobile-field'>
-                        <div style={{width: '260'}}>{header.name}</div>
-                        <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
-                    </div>
-                );
-            } else {
-                headerFields.push(
-
-                    <div className='mobile-field'>
-                        <div style={{width: '260'}}>{header.name}</div>
-                        <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
-                    </div>
-                );
-            }
-
-
+            headerFields.push(
+                <div className='mobile-field'>
+                    <div style={{width: '260'}}>{header.name}</div>
+                    <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
+                </div>
+            );
         });
 
         return (
@@ -112,7 +110,17 @@ export class Mobile extends React.Component {
                 <div style={{ width: '90%', display: 'flex', flexDirection: 'column' }}>
                     {headerFields}
                 </div>
+                <div>
+                    <label style={{minWidth: '1400'}}>
+                        Only Mobile Cookies?
+                        <input
+                            name="onlyMobileCookies"
+                            type="checkbox"
 
+                            checked={this.state.onlyMobileCookies}
+                            onChange={this.handleInputChange} />
+                    </label>
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'row', marginTop: 20 }}>
                     <div className='mobile-button' onClick={() => this.props.mobileActivateFn(false)}>
                         deactivate
@@ -120,7 +128,19 @@ export class Mobile extends React.Component {
                     <div className='mobile-button' onClick={() => {
                             var headers = {}
                             _.each(this.state.mobileHeaders, function(header) {
-                                headers[header.name] = this.refs[header.name].value;
+                                // make sure that the we wanna use the mobile-cookie to override the browserCookie
+                                if (header.name === 'MOBILE-COOKIE' ) {
+                                    if (this.state.onlyMobileCookies) {
+                                        headers[header.name] = 'override=true;';
+                                    } else {
+                                        headers[header.name] = 'override=false;';
+                                    }
+                                    headers[header.name] += this.refs[header.name].value;
+                                } else {
+                                    headers[header.name] = this.refs[header.name].value;
+                                }
+
+                                console.log("======: ", headers[header.name]);
                             }.bind(this));
                             console.log('headers in mobile: ', headers);
                             this.props.mobileActivateFn(true, headers);

@@ -143,6 +143,7 @@ export class GraphiQL extends React.Component {
       isWaitingForResponse: false,
       subscription: null,
       mobileCookieStore: '',
+      browserCookieStore: '',
       ...queryFacts
     };
 
@@ -917,26 +918,39 @@ export class GraphiQL extends React.Component {
 
     if (activated) {
         // set mobile cookies
-        let mobileCookie = headers['COOKIE'];
-        let mobileCookieArr = mobileCookie.split(';')
-        mobileCookieArr.forEach(elem => {
-            console.log('$$$$$$: ', elem);
-            if (elem && elem.length > 0) {
-                let elemArr = elem.split('=');
-                let name = elemArr[0];
-                let val = elemArr[1];
-                if (name) {
-                    cookieHelper.overrideOrSetCookie(name, val, 1);
-                }
-            }
-        });
-        console.log('$$$$ all cookies: ', document.cookie);
+        let browserCookies = document.cookie;
+
         this.setState({
             mobileDiagOpen: !this.state.mobileDiagOpen,
             mobileMode: activated,
-            mobileCookieStore: headers['COOKIE']
+            browserCookieStore: browserCookies,
+            mobileCookieStore: headers['MOBILE-COOKIE']
         });
     } else {
+        // restore browse cookies
+        let browserCookies = this.state.browserCookieStore;
+        if (browserCookies) {
+            let browserCookiesArr = browserCookies.split(';');
+            console.log('~~~~~~~ browserCookies: ', browserCookiesArr);
+            browserCookiesArr.forEach(elem => {
+                console.log('##### browserCookie elem: ', elem);
+                if (elem && elem.length > 0) {
+                    let elemArr = elem.split('=');
+                    let name = elemArr[0];
+                    let val = elemArr[1];
+                    if (name) {
+                        cookieHelper.overrideOrSetCookie(name, val, 10);
+                    }
+                }
+            });
+        }
+
+        this.setState({
+            mobileDiagOpen: !this.state.mobileDiagOpen,
+            mobileMode: activated
+        });
+
+        /*
         // delete mobile cookies
         console.log('**** disable mobile: ', this.state.mobileCookieStore);
         let mobileCookies = this.state.mobileCookieStore;
@@ -950,11 +964,8 @@ export class GraphiQL extends React.Component {
                 }
             }
         });
-        this.setState({
-            mobileDiagOpen: !this.state.mobileDiagOpen,
-            mobileMode: activated,
-            mobileCookieStore: ''
-        });
+        */
+
     }
   }
 
