@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) Houz, Inc.
+ *  Copyright (c) Houzz, Inc.
  *  All rights reserved.
  *
  */
@@ -7,6 +7,7 @@
 import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
+import apiHelper from '../utility/apiHelper';
 
 /**
  * Mobile mode and mobile header dialogue
@@ -37,7 +38,7 @@ export class Mobile extends React.Component {
             },
             {
                 name: 'X-HOUZZ-API-SSL-TOKEN',
-                value: 'fQAAAAAAhyFpWRLFEAQ7FVObeEDCZ5EjmHXAjwHGcsPztmTRg4h3JTxWVfqWrmdhcnl5dWU='
+                value: ''
             },
             {
                 name: 'X-HOUZZ-API-VISITOR-TOKEN',
@@ -70,8 +71,9 @@ export class Mobile extends React.Component {
             onlyMobileCookies: true
         };
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+        this.getTokens = this.getTokens.bind(this);
     }
-
 
     handleInputChange(event) {
         const target = event.target;
@@ -85,6 +87,68 @@ export class Mobile extends React.Component {
         });
     }
 
+    handleChange(event) {
+        console.log('event name: ', event.target.name);
+        console.log('event value:', event.target.value);
+        let name = event.target.name;
+        let value = event.target.value;
+        this.updateHeader(name, value);
+        // this.setState({value: event.target.value});
+    }
+
+    getTokens(user, password) {
+        let url = apiHelper.getUrl('format=json&version=185&app=test1&method=getToken');
+        let body = 'otherApp=&username='+user+'&pwd=eciaa310';
+        let options = {
+            method: 'post',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'compress': false,
+            },
+            body: body,
+        };
+
+        apiHelper.fetchUrlPost(url, options).then(res => {
+            console.log('res=>>> : ', res);
+            if (res.Ack === 'Success') {
+                let userName = res.Username;
+                let SSLToken = res.SSLAuthToken;
+                console.log('--> userName: ',userName);
+                console.log('--< SSLToken: ', SSLToken);
+                console.log('<<<<<<>>>>>>>> this: ', this);
+                this.updateHeader('X-HOUZZ-API-SSL-TOKEN', SSLToken);
+            }
+            return res;
+        }).catch(err => {
+            console.log('err==<<: ', err);
+        });
+    }
+
+    updateHeader(name, value) {
+        let curHeaders = this.state.mobileHeaders;
+        curHeaders.forEach(elem => {
+            if (elem && elem.name === name) {
+                elem.value = value;
+            }
+        });
+        console.log('====>>>>> curHeaders: ', curHeaders);
+        this.setState({
+            mobileHeaders: curHeaders
+        });
+    }
+
+    getUserName() {
+        let userName = null;
+        this.state.mobileHeaders.forEach(elem => {
+            if (elem.name === 'X-HOUZZ-API-USER-NAME') {
+                userName = elem.value;
+            }
+        });
+        return userName;
+    }
+
+
 
     render() {
         const { show } = this.props;
@@ -92,13 +156,14 @@ export class Mobile extends React.Component {
 
         var headerFields = [];
         _.each(this.state.mobileHeaders, function(header) {
+            console.log('%%%%%%%%%%%%%%%%%%%%%%: ', this);
             headerFields.push(
                 <div className='mobile-field'>
                     <div style={{width: '260'}}>{header.name}</div>
-                    <input defaultValue={header.value} style={{minWidth: '400'}} ref={header.name}/>
+                    <input value={header.value} style={{minWidth: '400'}} name={header.name} onChange={this.handleChange} />
                 </div>
             );
-        });
+        }.bind(this));
 
         return (
         <div className="mobile-modal" style={modalStyle}>
@@ -135,18 +200,33 @@ export class Mobile extends React.Component {
                                     } else {
                                         headers[header.name] = 'override=false;';
                                     }
-                                    headers[header.name] += this.refs[header.name].value;
+                                    headers[header.name] += header.value;
                                 } else {
-                                    headers[header.name] = this.refs[header.name].value;
+                                    headers[header.name] = header.value;
                                 }
 
                                 console.log("======: ", headers[header.name]);
                             }.bind(this));
-                            console.log('headers in mobile: ', headers);
+
                             this.props.mobileActivateFn(true, headers);
                         }}>
                         activate
                     </div>
+
+                    <div className='mobile-button' onClick={() => {
+                            console.log('%%%%%%%%%% this: ', this);
+                            console.log('$$$$$$$$: ', this.state.mobileHeaders);
+
+                            var username = this.getUserName();
+                            console.log("$$$$ username ", username);
+
+                            // var username2 = this.refs['X-HOUZZ-API-USER-NAME'].value;
+                            // console.log('==>> username2: ', username2);
+                            this.getTokens(username)
+                        }}>
+                        getSSLToken
+                    </div>
+
                 </div>
             </div>
         </div>

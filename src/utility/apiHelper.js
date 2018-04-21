@@ -18,7 +18,16 @@ function fetchUrl(url, headers) {
     });
 }
 
+function fetchUrlPost(url, options) {
+    return fetch(url, options)
+    .then(res => {
+        return res.json();
+    });
+}
+
+
 module.exports = {
     getUrl,
-    fetchUrl
+    fetchUrl,
+    fetchUrlPost
 };
