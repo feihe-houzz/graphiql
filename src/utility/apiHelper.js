@@ -11,6 +11,13 @@ function getUrl(paramStr) {
     return cur_url;
 }
 
+function getHost() {
+    var url = window.location.href;
+    var urlObject = urlUtil.parse(url);
+    var host = urlObject.host
+    return host;
+}
+
 function fetchUrl(url, headers) {
     return fetch(url, headers)
     .then(res => {
@@ -29,5 +36,6 @@ function fetchUrlPost(url, options) {
 module.exports = {
     getUrl,
     fetchUrl,
-    fetchUrlPost
+    fetchUrlPost,
+    getHost
 };

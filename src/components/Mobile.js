@@ -8,7 +8,9 @@ import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import apiHelper from '../utility/apiHelper';
-
+var ReactToastr = require("react-toastr");
+var {ToastContainer} = ReactToastr; // This is a React Element.
+var ToastMessageFactory = React.createFactory(ReactToastr.ToastMessage.animation);
 /**
  * Mobile mode and mobile header dialogue
  *
@@ -18,6 +20,8 @@ import apiHelper from '../utility/apiHelper';
  *   Headers will be honored for authenitcation, and response field will be UpperCase style for mobile client compatibility
  * - When modal button 'deactivate' is clicked, headers will be ignored, and normal camelCase response is resumed.
  */
+
+
 export class Mobile extends React.Component {
 
     constructor(props) {
@@ -68,11 +72,13 @@ export class Mobile extends React.Component {
 
         this.state = {
             mobileHeaders: this.headers,
-            onlyMobileCookies: true
+            onlyMobileCookies: true,
+            password: ''
         };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.getTokens = this.getTokens.bind(this);
+        this.toast = this.toast.bind(this);
     }
 
     handleInputChange(event) {
@@ -92,13 +98,43 @@ export class Mobile extends React.Component {
         console.log('event value:', event.target.value);
         let name = event.target.name;
         let value = event.target.value;
-        this.updateHeader(name, value);
+        if (name === 'password') {
+            this.setState({
+                password: value
+            });
+        } else {
+            this.updateHeader(name, value);
+        }
+
+
         // this.setState({value: event.target.value});
     }
 
-    getTokens(user, password) {
+
+
+    toast(msg, method) {
+      this.refs.container[method](
+          "",
+          msg, {
+              timeOut: 3000,
+          }
+      );
+    }
+
+    getTokens(user) {
         let url = apiHelper.getUrl('format=json&version=185&app=test1&method=getToken');
-        let body = 'otherApp=&username='+user+'&pwd=eciaa310';
+        let host = apiHelper.getHost();
+        console.log('#######: ', host);
+        let curPassword = '';
+        if (host.includes('houzz.com')) {
+            curPassword = this.status.password;
+            console.log('~~~~~~~~~~~~~~~');
+        } else {
+            curPassword = 'eciaa310';
+        }
+        let body = 'otherApp=&username='+user+'&pwd='+ curPassword;
+
+        // console.log('========== body: ', body);
         let options = {
             method: 'post',
             headers: {
@@ -118,10 +154,16 @@ export class Mobile extends React.Component {
                 console.log('--< SSLToken: ', SSLToken);
                 console.log('<<<<<<>>>>>>>> this: ', this);
                 this.updateHeader('X-HOUZZ-API-SSL-TOKEN', SSLToken);
+            } else {
+                if (res.Ack === 'Error') {
+                    //this.toast(res.ShortMessage, 'Please make sure the username and password are valid');
+                    // console.log('$$$$$$ res: ', res);
+                }
             }
             return res;
         }).catch(err => {
             console.log('err==<<: ', err);
+            // this.toast(err.name, 'error');
         });
     }
 
@@ -148,6 +190,8 @@ export class Mobile extends React.Component {
         return userName;
     }
 
+//style={{width: '400'}}
+
 
 
     render() {
@@ -156,13 +200,29 @@ export class Mobile extends React.Component {
 
         var headerFields = [];
         _.each(this.state.mobileHeaders, function(header) {
-            console.log('%%%%%%%%%%%%%%%%%%%%%%: ', this);
-            headerFields.push(
-                <div className='mobile-field'>
-                    <div style={{width: '260'}}>{header.name}</div>
-                    <input value={header.value} style={{minWidth: '400'}} name={header.name} onChange={this.handleChange} />
-                </div>
-            );
+            // console.log('%%%%%%%%%%%%%%%%%%%%%%: ', this);
+            if (header.name === 'X-HOUZZ-API-USER-NAME') {
+                headerFields.push(
+                    <div className='mobile-field'>
+                        <div style={{width: '260'}}>{header.name}</div>
+                        <div style={{minWidth: '400'}}>
+                        <input value={header.value} style={{width: '100'}} name={header.name} onChange={this.handleChange} />
+                        <label >
+                            Password:
+                            <input type='password' placeholder='No need for staging&houzz2' value={this.state.password} style={{minWidth: '230'}} name='password' onChange={this.handleChange} />
+                        </label>
+                        </div>
+                    </div>
+                );
+            } else {
+                headerFields.push(
+                    <div className='mobile-field'>
+                        <div style={{width: '260'}}>{header.name}</div>
+                        <input value={header.value} style={{minWidth: '400'}} name={header.name} onChange={this.handleChange} />
+                    </div>
+                );
+            }
+
         }.bind(this));
 
         return (
@@ -175,17 +235,7 @@ export class Mobile extends React.Component {
                 <div style={{ width: '90%', display: 'flex', flexDirection: 'column' }}>
                     {headerFields}
                 </div>
-                <div>
-                    <label style={{minWidth: '1400'}}>
-                        Only Mobile Cookies?
-                        <input
-                            name="onlyMobileCookies"
-                            type="checkbox"
 
-                            checked={this.state.onlyMobileCookies}
-                            onChange={this.handleInputChange} />
-                    </label>
-                </div>
                 <div style={{ display: 'flex', flexDirection: 'row', marginTop: 20 }}>
                     <div className='mobile-button' onClick={() => this.props.mobileActivateFn(false)}>
                         deactivate
@@ -193,17 +243,8 @@ export class Mobile extends React.Component {
                     <div className='mobile-button' onClick={() => {
                             var headers = {}
                             _.each(this.state.mobileHeaders, function(header) {
-                                // make sure that the we wanna use the mobile-cookie to override the browserCookie
-                                if (header.name === 'MOBILE-COOKIE' ) {
-                                    if (this.state.onlyMobileCookies) {
-                                        headers[header.name] = 'override=true;';
-                                    } else {
-                                        headers[header.name] = 'override=false;';
-                                    }
-                                    headers[header.name] += header.value;
-                                } else {
-                                    headers[header.name] = header.value;
-                                }
+
+                                headers[header.name] = header.value;
 
                                 console.log("======: ", headers[header.name]);
                             }.bind(this));
@@ -226,11 +267,40 @@ export class Mobile extends React.Component {
                         }}>
                         getSSLToken
                     </div>
-
                 </div>
             </div>
+            <ToastContainer ref="container"
+                            toastMessageFactory={ToastMessageFactory}
+                            style={{position: 'absolute', right: '100px', bottom: '30px'}} />
         </div>
         );
     }
 
 }
+
+/*
+// make sure that the we wanna use the mobile-cookie to override the browserCookie
+if (header.name === 'MOBILE-COOKIE' ) {
+    if (this.state.onlyMobileCookies) {
+        headers[header.name] = 'override=true;';
+    } else {
+        headers[header.name] = 'override=false;';
+    }
+    headers[header.name] += header.value;
+} else {
+
+}
+
+<div>
+    <label style={{minWidth: '1400'}}>
+        Only Mobile Cookies?
+        <input
+            name="onlyMobileCookies"
+            type="checkbox"
+
+            checked={this.state.onlyMobileCookies}
+            onChange={this.handleInputChange} />
+    </label>
+</div>
+
+*/
