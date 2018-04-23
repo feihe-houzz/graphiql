@@ -126,7 +126,7 @@ export class Mobile extends React.Component {
         let host = apiHelper.getHost();
         console.log('#######: ', host);
         let curPassword = '';
-        if (host.includes('houzz.com')) {
+        if (host.includes('houzz.com') && !host.includes('stghouzz.com')) {
             curPassword = this.status.password;
             console.log('~~~~~~~~~~~~~~~');
         } else {
