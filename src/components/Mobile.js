@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { Alert } from 'reactstrap';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import apiHelper from '../utility/apiHelper';
@@ -123,6 +124,7 @@ export class Mobile extends React.Component {
 
     getTokens(user) {
         let url = apiHelper.getUrl('format=json&version=185&app=test1&method=getToken');
+        console.log('$$$$ url: ', url);
         let host = apiHelper.getHost();
         console.log('#######: ', host);
         let curPassword = '';
@@ -132,6 +134,8 @@ export class Mobile extends React.Component {
         } else {
             curPassword = 'eciaa310';
         }
+
+        console.log('$$$$ password: ', curPassword);
         let body = 'otherApp=&username='+user+'&pwd='+ curPassword;
 
         // console.log('========== body: ', body);
