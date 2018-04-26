@@ -41,11 +41,18 @@ export class UnitTestAutoGen extends React.Component {
     }
 
     composeQueryStr(queryObj) {
+        if (!queryObj.variables) {
+            queryObj.variables = null;
+        }
+
+        if (!queryObj.operationName) {
+            queryObj.operationName = null;
+        }
         let str = '{' + '\n' +
         '    ' +  'query: '  +
         '          ' + '\n\`'+ queryObj.query + '\`'+ ',\n' +
         '    ' + 'variables: ' + queryObj.variables + ',\n'  +
-        '    ' + 'operationName: ' + '\'' + queryObj.operationName + '\''  +
+        '    ' + 'operationName: ' + queryObj.operationName +
         '\n}';
         return str;
     }
