@@ -9,6 +9,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
+
 import {
   buildClientSchema,
   GraphQLSchema,
@@ -17,6 +18,7 @@ import {
 } from 'graphql';
 
 import { UnitTestAutoGen } from './UnitTestAutoGen';
+import {SnapshotShare} from './SnapshotShare';
 import { Mobile } from './Mobile';
 import { ThriftConverter } from './ThriftConverter';
 import { ExecuteButton } from './ExecuteButton';
@@ -40,6 +42,7 @@ import find from '../utility/find';
 import { fillLeafs } from '../utility/fillLeafs';
 import { getLeft, getTop } from '../utility/elementPosition';
 import cookieHelper from '../utility/cookieHelper';
+import apiHelper from '../utility/apiHelper';
 
 import {
   introspectionQuery,
@@ -62,6 +65,7 @@ export class GraphiQL extends React.Component {
     variables: PropTypes.string,
     operationName: PropTypes.string,
     response: PropTypes.string,
+    snapshot: PropTypes.string,
     storage: PropTypes.shape({
       getItem: PropTypes.func,
       setItem: PropTypes.func,
@@ -112,12 +116,15 @@ export class GraphiQL extends React.Component {
         queryFacts && queryFacts.operations
       );
 
+     const snapshot = props.snapshot !== undefined ? props.snapshot : null;
+
     // Initialize state
     this.state = {
       schema: props.schema,
       query,
       variables,
       operationName,
+      snapshot,
       response: props.response,
       resultImages: [],
       editorFlex: Number(this._storage.get('editorFlex')) || 1,
@@ -135,7 +142,9 @@ export class GraphiQL extends React.Component {
       thriftDiagOpen:
           (this._storage.get('thriftDiagOpen') === 'true') || false,
       unitTestAutoGenDiagOpen:
-                  (this._storage.get('unitTestAutoGenDiagOpen') === 'true') || false,
+          (this._storage.get('unitTestAutoGenDiagOpen') === 'true') || false,
+      snapshotShareDiagOpen:
+              (this._storage.get('snapshotShareDiagOpen') === 'true') || false,
       mobileDiagOpen:
           (this._storage.get('mobileDiagOpen') === 'true') || false,
       mobileMode: false,
@@ -144,6 +153,8 @@ export class GraphiQL extends React.Component {
       subscription: null,
       mobileCookieStore: '',
       browserCookieStore: '',
+      fromSnapshot: false,
+      snapshotURL: '',
       ...queryFacts
     };
 
@@ -171,6 +182,11 @@ export class GraphiQL extends React.Component {
     this.codeMirrorSizer = new CodeMirrorSizer();
 
     global.g = this;
+
+    // fetch snapshot if it is set
+    if (this.state.snapshot) {
+        this.fetchSnapshotById(this.state.snapshot);
+    }
 
   }
 
@@ -301,6 +317,12 @@ export class GraphiQL extends React.Component {
           title="Unit Test Auto Generation"
           label="Unit Test Auto-Gen"
         />
+
+        <ToolbarButton
+          onClick={this.handleToggleSnapshotShare}
+          title="Snapshot Share"
+          label="Snapshot Share"
+        />
       </GraphiQL.Toolbar>;
 
     const footer = find(children, child => child.type === GraphiQL.Footer);
@@ -349,8 +371,18 @@ export class GraphiQL extends React.Component {
             response={this.state.response}
             show={this.state.unitTestAutoGenDiagOpen}
             onClose={() => this.setState({ unitTestAutoGenDiagOpen: false })} />
+        <SnapshotShare
+            snapshotURL={this.state.snapshotURL}
+            show={this.state.snapshotShareDiagOpen}
+            onClose={() => this.setState({ snapshotShareDiagOpen: false })}
+        />
+
         <ThriftConverter show={this.state.thriftDiagOpen} onClose={() => this.setState({ thriftDiagOpen: false })} />
-        <Mobile show={this.state.mobileDiagOpen} onClose={() => this.setState({ mobileDiagOpen: false })}
+        <Mobile
+            mobileCookieStore={this.state.mobileCookieStore}
+            fromSnapshot = {this.state.fromSnapshot}
+            show={this.state.mobileDiagOpen}
+            onClose={() => this.setState({ mobileDiagOpen: false })}
             mobileActivateFn={this.handleMobileActivateFn}/>
         <div className="historyPaneWrap" style={historyPaneStyle}>
           <QueryHistory
@@ -635,10 +667,10 @@ export class GraphiQL extends React.Component {
     });
   }
 
-  _fetchQuery(query, variables, operationName, headers, cb) {
+  _fetchQuery(query, variables, operationName, headers, cb)
+  {
     const fetcher = this.props.fetcher;
     let jsonVariables = null;
-
     try {
       jsonVariables =
         variables && variables.trim() !== '' ? JSON.parse(variables) : null;
@@ -692,6 +724,135 @@ export class GraphiQL extends React.Component {
     }
   }
 
+  shareSnapshot() {
+      console.log('========= current Query: ', this.state.query);
+      console.log('========= current Variables: ', this.state.variables);
+      console.log('========= current Response: ', this.state.response);
+      console.log('========= current mobileCookies: ', this.state.mobileCookieStore);
+      console.log('========= current browserCookies: ', this.state.browserCookieStore);
+
+
+      let curQuery = JSON.stringify(this.state.query);
+      let curVariables =  JSON.stringify(this.state.variables) || " ";
+      let curRes =  JSON.stringify(this.state.response) || " ";
+      let curMCookies = JSON.stringify(this.state.mobileCookieStore);
+    // let curBCookies = JSON.stringify(this.state.browserCookieStore);
+
+    let curBCookies = JSON.stringify(document.cookie);
+
+      let snapshotQuery = `
+          mutation {
+            saveGraphouzzSnapshot(input: {
+              query: ${curQuery},
+              variables: ${curVariables},
+              response: ${curRes},
+              mobileCookies: ${curMCookies},
+              browserCookies: ${curBCookies}
+            }) {
+              status
+              id
+            }
+          }
+      `;
+      console.log('$$$$$: snapshotQuery: ', snapshotQuery);
+
+      // send a promise to fetch execute the above query
+      this._fetchQuery(
+          snapshotQuery,
+          null,
+          null,
+          null,
+          result =>{
+            console.log('========= result: ', result);
+            if (result && result.data &&
+                result.data.saveGraphouzzSnapshot &&
+                result.data.saveGraphouzzSnapshot.status &&
+                result.data.saveGraphouzzSnapshot.status === 'SUCCESS'
+            ) {
+                console.log('~~~~~~~~: ', result.data.saveGraphouzzSnapshot);
+                let snapshotId = result.data.saveGraphouzzSnapshot.id;
+                let shareUrl = apiHelper.getSnapshotUrl(snapshotId);
+                console.log('====>>>>> shareUrl: ', shareUrl);
+                this.setState({
+                    snapshotURL: shareUrl
+                });
+            } else {
+                this.setState({
+                    snapshotURL: "Please make sure at least the query exists!"
+                });
+            }
+          }
+      );
+  }
+
+  fetchSnapshotById(id) {
+      let idStr = JSON.stringify(id);
+      let getSnapshotQuery = `
+          query {
+            getGraphouzzSnapshotById(id: ${idStr}) {
+              id
+              query
+              variables
+              response
+              mobileCookies
+              browserCookies
+            }
+          }
+      `;
+
+      console.log('========= getSnapshotQuery: ', getSnapshotQuery);
+
+      this._fetchQuery(
+          getSnapshotQuery,
+          null,
+          null,
+          null,
+          result =>{
+            console.log('<<<>>>> result: ', result);
+            if (result && result.data && result.data.getGraphouzzSnapshotById) {
+                let snapData = result.data.getGraphouzzSnapshotById;
+                let snapId = snapData.id;
+                let snapQuery = snapData.query;
+                let snapRes = snapData.response;
+                let snapV = snapData.variables;
+                let snapBC = snapData.browserCookies;
+                let snapMC = snapData.mobileCookies;
+
+                console.log('====: ids: ', snapId);
+                console.log('====: query: ', snapQuery);
+                console.log('====: response: ', snapRes);
+                console.log('====: snapV: ', snapV);
+                console.log('====: snapBC: ', snapBC);
+                console.log('====: snapMC: ', snapMC);
+                let mobileModeEnabled = false;
+
+                let snapResponse = JSON.parse(snapRes);
+                console.log('======= snapResponse: ', snapResponse);
+                console.log('~~~~~~ ack: ', snapResponse.Ack);
+                mobileModeEnabled = mobileModeEnabled || snapMC || (snapResponse && snapResponse.Ack);
+                console.log('mobileModeEnabled: ', mobileModeEnabled);
+
+                if (mobileModeEnabled) {
+                    this.setState({
+                        mobileMode: true
+                    });
+                }
+
+                // show snapshot query, variables, response
+                this.setState({
+                    query: snapQuery,
+                    variables: snapV,
+                    response: snapRes,
+                    mobileCookieStore: snapMC,
+                    fromSnapshot: true
+                });
+
+            }
+          }
+      );
+
+  }
+
   handleClickReference = reference => {
     this.setState({ docExplorerOpen: true }, () => {
       console.log('docExplorerComponent: ', this.docExplorerComponent);
@@ -700,6 +861,10 @@ export class GraphiQL extends React.Component {
   }
 
   handleRunQuery = selectedOperationName => {
+    // disable the snapshot once the handleRunQuery is executed
+    this.setState({
+        fromSnapshot: false
+    });
     this._editorQueryID++;
     const queryID = this._editorQueryID;
 
@@ -907,7 +1072,12 @@ export class GraphiQL extends React.Component {
 
   handleToggleUnitTestAutoGen = () => {
       this.setState({ unitTestAutoGenDiagOpen: !this.state.unitTestAutoGenDiagOpen });
-    }
+  }
+
+  handleToggleSnapshotShare = () => {
+      this.shareSnapshot();
+      this.setState({ snapshotShareDiagOpen: !this.state.snapshotShareDiagOpen });
+  }
 
   handleToggleMobile = () => {
     this.setState({ mobileDiagOpen: !this.state.mobileDiagOpen });
@@ -947,7 +1117,9 @@ export class GraphiQL extends React.Component {
 
         this.setState({
             mobileDiagOpen: !this.state.mobileDiagOpen,
-            mobileMode: activated
+            mobileMode: activated,
+            mobileCookieStore: '',
+            browserCookieStore: document.cookie
         });
 
         /*

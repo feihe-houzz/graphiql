@@ -1,6 +1,6 @@
 {
   "name": "graphiql",
-  "version": "0.10.2-51",
+  "version": "0.10.2-54",
   "description": "0.10.2-8 - An graphical interactive in-browser GraphQL IDE.",
   "contributors": [
     "Hyohyeon Jeong <asiandrummer@fb.com>",
@@ -50,8 +50,10 @@
     "marked": "0.3.6",
     "md5": "^2.2.1",
     "node-fetch": "^2.1.2",
-    "react": "^16.0.0",
+    "react": "^16.3.2",
+    "react-bootstrap": "^0.32.1",
     "react-copy-to-clipboard": "^5.0.0",
+    "react-dom": "^16.3.2",
     "react-toastr": "^2.8.2",
     "reactstrap": "^5.0.0",
     "strip-indent": "^2.0.0"

@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import { Alert } from 'reactstrap';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import apiHelper from '../utility/apiHelper';
 var ReactToastr = require("react-toastr");
 var {ToastContainer} = ReactToastr; // This is a React Element.
 var ToastMessageFactory = React.createFactory(ReactToastr.ToastMessage.animation);
+// import { Button } from 'react-bootstrap';
+
 /**
  * Mobile mode and mobile header dialogue
  *
@@ -24,6 +25,10 @@ var ToastMessageFactory = React.createFactory(ReactToastr.ToastMessage.animation
 
 
 export class Mobile extends React.Component {
+    static propTypes = {
+      mobileCookieStore: PropTypes.string,
+      fromSnapshot: PropTypes.bool
+    }
 
     constructor(props) {
         super(props);
@@ -74,12 +79,28 @@ export class Mobile extends React.Component {
         this.state = {
             mobileHeaders: this.headers,
             onlyMobileCookies: true,
-            password: ''
+            password: '',
+            initialized: false
         };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.getTokens = this.getTokens.bind(this);
         this.toast = this.toast.bind(this);
+    }
+
+
+    componentDidMount() {
+    }
+
+    componentDidUpdate() {
+        if (!this.state.initialized &&
+            this.props.mobileCookieStore &&
+            this.props.fromSnapshot) {
+            this.setState({
+                initialized: true
+            });
+            this.updateHeader('MOBILE-COOKIE', this.props.mobileCookieStore);
+        }
     }
 
     handleInputChange(event) {
@@ -106,9 +127,6 @@ export class Mobile extends React.Component {
         } else {
             this.updateHeader(name, value);
         }
-
-
-        // this.setState({value: event.target.value});
     }
 
 
@@ -130,7 +148,6 @@ export class Mobile extends React.Component {
         let curPassword = '';
         if (host.includes('houzz.com') && !host.includes('stghouzz.com')) {
             curPassword = this.status.password;
-            console.log('~~~~~~~~~~~~~~~');
         } else {
             curPassword = 'eciaa310';
         }
@@ -178,7 +195,7 @@ export class Mobile extends React.Component {
                 elem.value = value;
             }
         });
-        console.log('====>>>>> curHeaders: ', curHeaders);
+        console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
         this.setState({
             mobileHeaders: curHeaders
         });
@@ -193,10 +210,6 @@ export class Mobile extends React.Component {
         });
         return userName;
     }
-
-//style={{width: '400'}}
-
-
 
     render() {
         const { show } = this.props;
@@ -226,7 +239,6 @@ export class Mobile extends React.Component {
                     </div>
                 );
             }
-
         }.bind(this));
 
         return (
