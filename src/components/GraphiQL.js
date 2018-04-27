@@ -371,6 +371,8 @@ export class GraphiQL extends React.Component {
             variables={this.state.variables}
             response={this.state.response}
             show={this.state.unitTestAutoGenDiagOpen}
+            mobileMode={this.state.mobileMode}
+            onRunQuery={this.handleEditorRunQuery}
             onClose={() => this.setState({ unitTestAutoGenDiagOpen: false })} />
         <SnapshotShare
             snapshotURL={this.state.snapshotURL}
@@ -1073,6 +1075,9 @@ export class GraphiQL extends React.Component {
 
 
   handleToggleUnitTestAutoGen = () => {
+      if (!this.state.response) {
+          this.handleEditorRunQuery();
+      }
       this.setState({ unitTestAutoGenDiagOpen: !this.state.unitTestAutoGenDiagOpen });
   }
 

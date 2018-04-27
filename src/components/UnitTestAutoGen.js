@@ -15,7 +15,9 @@ export class UnitTestAutoGen extends React.Component {
       query: PropTypes.string,
       variables: PropTypes.string,
       operationName: PropTypes.string,
-      response: PropTypes.string
+      response: PropTypes.string,
+      mobileMode: PropTypes.bool,
+      onRunQuery: PropTypes.func,
     }
 
     constructor(props) {
@@ -23,17 +25,18 @@ export class UnitTestAutoGen extends React.Component {
         this.state = {
             isMobile: false,
             needAuth: false,
-            unitTestOutput: 'The unit test for this Query will be generated here'
+            unitTestOutput: 'The unit test for this Query will be generated here',
         };
         this.handleInputChange = this.handleInputChange.bind(this);
     }
+
 
     handleInputChange(event) {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-        console.log('>>>> name: ', name);
-        console.log('&&&& value: ', value);
+        // console.log('>>>> name: ', name);
+        // console.log('&&&& value: ', value);
 
         this.setState({
             [name]: value
@@ -50,16 +53,40 @@ export class UnitTestAutoGen extends React.Component {
         }
         let str = '{' + '\n' +
         '    ' +  'query: '  +
-        '          ' + '\n\`'+ queryObj.query + '\`'+ ',\n' +
+        '\n       \`'+ queryObj.query + '\`'+ ',\n' +
         '    ' + 'variables: ' + queryObj.variables + ',\n'  +
         '    ' + 'operationName: ' + queryObj.operationName +
         '\n}';
         return str;
     }
 
-    generateUnitTest() {
+    composeFullTest(testBody) {
+        console.log('===>>> testBody: \n', testBody);
+        // massage the testString
+        let testBodyMsg = testBody.replace(/\n/g, '\n            ');
+
+        // leave the following string as it is
+        let fullTest = `
+describe('Test - ??', function() {
+    it('should return desired response', function() {
+        return test.queryExpect(
+        ${testBodyMsg}
+        );
+    });
+});`;
+        return fullTest;
+
+    }
+
+    generateUnitTest(fullTest) {
+        if (!this.props.response) {
+            if (this.props.onRunQuery) {
+              this.props.onRunQuery();
+            }
+        }
         // console.log('@@@@@ this.props.response: ', this.props.response);
         if (!this.props.response) {
+
             this.setState({
               unitTestOutput: 'Please get the Query Result First'
             });
@@ -75,7 +102,7 @@ export class UnitTestAutoGen extends React.Component {
         delete res._gtrace;
 
         // massage the curQuery string
-        curQuery = curQuery.replace(/\n/g, '\n      ');
+        curQuery = curQuery.replace(/\n/g, '\n           ');
         let curReq = {
             query: curQuery,
             variables: curVariables,
@@ -88,7 +115,8 @@ export class UnitTestAutoGen extends React.Component {
         unitTest = curUnitTest;
         let options = {};
 
-        if (this.state.isMobile) {
+
+        if (this.props.mobileMode) {
             _.extend(options, {isMobile: true});
         }
 
@@ -96,19 +124,20 @@ export class UnitTestAutoGen extends React.Component {
             _.extend(options, {needsAuthentication: true});
         }
 
-        console.log('$$$$$ options: ', JSON.stringify(options));
-        // if (JSON.stringify(options) !== '{}') {
-        //     unitTest = unitTest + ',\n' + JSON.stringify(options, null, 4);
-        // }
-        console.log('===>>> Object.getOwnPropertyNames(options).length: ', Object.getOwnPropertyNames(options).length);
+        // console.log('$$$$$ options: ', JSON.stringify(options));
+
+        // console.log('===>>> Object.getOwnPropertyNames(options).length: ', Object.getOwnPropertyNames(options).length);
         if (Object.getOwnPropertyNames(options).length !== 0) {
             unitTest = unitTest + ',\n' + JSON.stringify(options, null, 4);
+        }
+
+        if(fullTest) {
+            unitTest = this.composeFullTest(unitTest);
         }
         this.setState({
           unitTestOutput: unitTest
         });
     }
-
 
     render() {
         const { show } = this.props;
@@ -119,36 +148,31 @@ export class UnitTestAutoGen extends React.Component {
                 <span className="close" onClick={() => this.props.onClose()}>
                     &times;
                 </span>
-                <p><b>Unit Test Auto-Gen</b></p>
+                <h2><b>Unit Test Auto-Gen</b></h2>
 
                 <div style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
-                    <label>
-                        is Mobile query:
-                        <input
-                            name="isMobile"
-                            type="checkbox"
-                            checked={this.state.isMobile}
-                            onChange={this.handleInputChange} />
-                    </label>
-                    <label>
-                    </label>
-                    <label>
-                        need Authentication:
-                        <input
-                            name="needAuth"
-                            type="checkbox"
-                            checked={this.state.needAuth}
-                            onChange={this.handleInputChange} />
-                    </label>
-
-                    <button type="button"  onClick={() => this.generateUnitTest()}>
-                        generate
-                    </button>
+                    <div style={{
+                        minWidth: '160px', padding: '20px 10px 10px 0px', 'fontSize': '17px'}}>
+                        <label >
+                            Authentication:
+                            <input
+                                name="needAuth"
+                                type="checkbox"
+                                checked={this.state.needAuth}
+                                onChange={this.handleInputChange} />
+                        </label>
+                    </div>
+                    <div className='mobile-button' onClick={() => this.generateUnitTest()}>
+                        Generate
+                    </div>
+                    <div className='mobile-button' onClick={() => this.generateUnitTest(true)}>
+                        GenerateWithCode
+                    </div>
                 </div>
 
                 <textarea rows='50' cols='100' name="comment" readOnly={false}
                           placeholder={'Unit Test will be generated here'}
-                    style={{ flex: '4', height: '100%', fontSize: '16px', padding: '10px' }}
+                    style={{ padding: '0px', width: '90%', fontSize: '16px' }}
                     value={this.state.unitTestOutput}>
                 </textarea>
             </div>
@@ -156,3 +180,5 @@ export class UnitTestAutoGen extends React.Component {
         );
     }
 }
+
+// style={{ flex: '4', height: '100%', fontSize: '16px', padding: '10px' }}
