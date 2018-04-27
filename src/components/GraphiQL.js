@@ -734,15 +734,13 @@ export class GraphiQL extends React.Component {
     //   console.log('========= current Response: ', this.state.response);
     //   console.log('========= current mobileCookies: ', this.state.mobileCookieStore);
     //   console.log('========= current browserCookies: ', this.state.browserCookieStore);
-
-
       let curQuery = JSON.stringify(this.state.query);
       let curVariables =  JSON.stringify(this.state.variables) || " ";
       let curRes =  JSON.stringify(this.state.response) || " ";
       let curMCookies = JSON.stringify(this.state.mobileCookieStore);
       let curBCookies = JSON.stringify(document.cookie);
 
-      if (curQuery) {
+      if (curQuery && curQuery.includes('{')) {
           let snapshotQuery = `
               mutation {
                 saveGraphouzzSnapshot(input: {
