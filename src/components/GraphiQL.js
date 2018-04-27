@@ -729,64 +729,69 @@ export class GraphiQL extends React.Component {
   }
 
   shareSnapshot() {
-      console.log('========= current Query: ', this.state.query);
-      console.log('========= current Variables: ', this.state.variables);
-      console.log('========= current Response: ', this.state.response);
-      console.log('========= current mobileCookies: ', this.state.mobileCookieStore);
-      console.log('========= current browserCookies: ', this.state.browserCookieStore);
+    //   console.log('========= current Query: ', this.state.query);
+    //   console.log('========= current Variables: ', this.state.variables);
+    //   console.log('========= current Response: ', this.state.response);
+    //   console.log('========= current mobileCookies: ', this.state.mobileCookieStore);
+    //   console.log('========= current browserCookies: ', this.state.browserCookieStore);
 
 
       let curQuery = JSON.stringify(this.state.query);
       let curVariables =  JSON.stringify(this.state.variables) || " ";
       let curRes =  JSON.stringify(this.state.response) || " ";
       let curMCookies = JSON.stringify(this.state.mobileCookieStore);
-    // let curBCookies = JSON.stringify(this.state.browserCookieStore);
+      let curBCookies = JSON.stringify(document.cookie);
 
-    let curBCookies = JSON.stringify(document.cookie);
+      if (curQuery) {
+          let snapshotQuery = `
+              mutation {
+                saveGraphouzzSnapshot(input: {
+                  query: ${curQuery},
+                  variables: ${curVariables},
+                  response: ${curRes},
+                  mobileCookies: ${curMCookies},
+                  browserCookies: ${curBCookies}
+                }) {
+                  status
+                  id
+                }
+              }
+          `;
+          console.log('$$$$$: snapshotQuery: ', snapshotQuery);
 
-      let snapshotQuery = `
-          mutation {
-            saveGraphouzzSnapshot(input: {
-              query: ${curQuery},
-              variables: ${curVariables},
-              response: ${curRes},
-              mobileCookies: ${curMCookies},
-              browserCookies: ${curBCookies}
-            }) {
-              status
-              id
-            }
-          }
-      `;
-      console.log('$$$$$: snapshotQuery: ', snapshotQuery);
+          // send a promise to fetch execute the above query
+          this._fetchQuery(
+              snapshotQuery,
+              null,
+              null,
+              null,
+              result =>{
+                console.log('========= result: ', result);
+                if (result && result.data &&
+                    result.data.saveGraphouzzSnapshot &&
+                    result.data.saveGraphouzzSnapshot.status &&
+                    result.data.saveGraphouzzSnapshot.status === 'SUCCESS'
+                ) {
+                    console.log('~~~~~~~~: ', result.data.saveGraphouzzSnapshot);
+                    let snapshotId = result.data.saveGraphouzzSnapshot.id;
+                    let shareUrl = apiHelper.getSnapshotUrl(snapshotId);
+                    console.log('====>>>>> shareUrl: ', shareUrl);
+                    this.setState({
+                        snapshotURL: shareUrl
+                    });
+                } else {
+                    this.setState({
+                        snapshotURL: "Fail to generate snapshotURL due to network or backend error"
+                    });
+                }
+              }
+          );
+      } else {
+          this.setState({
+              snapshotURL: "Please make sure the query exists!"
+          });
+      }
 
-      // send a promise to fetch execute the above query
-      this._fetchQuery(
-          snapshotQuery,
-          null,
-          null,
-          null,
-          result =>{
-            console.log('========= result: ', result);
-            if (result && result.data &&
-                result.data.saveGraphouzzSnapshot &&
-                result.data.saveGraphouzzSnapshot.status &&
-                result.data.saveGraphouzzSnapshot.status === 'SUCCESS'
-            ) {
-                console.log('~~~~~~~~: ', result.data.saveGraphouzzSnapshot);
-                let snapshotId = result.data.saveGraphouzzSnapshot.id;
-                let shareUrl = apiHelper.getSnapshotUrl(snapshotId);
-                console.log('====>>>>> shareUrl: ', shareUrl);
-                this.setState({
-                    snapshotURL: shareUrl
-                });
-            } else {
-                this.setState({
-                    snapshotURL: "Please make sure at least the query exists!"
-                });
-            }
-          }
-      );
   }
 
   fetchSnapshotById(id) {
