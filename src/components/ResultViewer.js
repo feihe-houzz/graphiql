@@ -63,7 +63,18 @@ export class ResultViewer extends React.Component {
 
   componentDidUpdate() {
     this.viewer.setValue(this.props.value || '');
-
+    
+    // automatically fold _gtrace object whenever result is updated
+    var cm = this.viewer;
+    const CodeMirror = require('codemirror');
+    var Pos = CodeMirror.Pos;
+    for (let i = 0; i < cm.lineCount(); i++) {
+        var lineStr = cm.getLine(i);
+        if (lineStr.includes('_gtrace')) {
+            cm.foldCode(Pos(i, 0), null);
+        }
+    }
+    //console.log('--->>>> got results: ', this.props.value);
     /*
     $("span:contains('url') .cm-property").siblings("span:contains('.jpg') .cm-string").each(
         function() {

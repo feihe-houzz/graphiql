@@ -17,6 +17,7 @@ import {
   print,
 } from 'graphql';
 
+import { ResultStatusBar } from './ResultStatusBar';
 import { UnitTestAutoGen } from './UnitTestAutoGen';
 import {SnapshotShare} from './SnapshotShare';
 import { Mobile } from './Mobile';
@@ -487,6 +488,7 @@ export class GraphiQL extends React.Component {
                 value={this.state.response}
                 editorTheme={this.props.editorTheme}
               />
+              <ResultStatusBar value={this.state.response}/>
               {footer}
             </div>
           </div>
