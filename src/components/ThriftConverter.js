@@ -164,42 +164,46 @@ export class ThriftConverter extends React.Component {
     }
 
     _constructGraphQLStruct(data) {
-        var schema = '';
-        schema += 'type ' + data.name + ' {\n';
-        _.each(data.fields, (field) => {
-            schema += '\t' + field.name + ': ' + this._convertType(field.type) + '\n';
-        });
+        if (data) {
+            var schema = '';
+            schema += 'type ' + data.name + ' {\n';
+            _.each(data.fields, (field) => {
+                schema += '\t' + field.name + ': ' + this._convertType(field.type) + '\n';
+            });
 
-        schema += '}';
+            schema += '}';
 
-        return schema;
+            return schema;
+        }
     }
 
     _constructGraphQLEnum(data) {
-        // console.log('===>>> data: ', data);
-        var schema = '';
-        var resolver='';
+       // console.log('===>>> data: ', data);
+       var schema = '';
+       var resolver='';
 
-        schema += 'enum ' + data.name + ' {\n';
+       schema += 'enum ' + data.name + ' {\n';
 
-        resolver += data.name + ' {\n';
-        _.each(data.fields, (field) => {
-            schema += '\t' + field.type +'\n';
-            resolver += '\t' + field.type + ': ' + field.name + ',\n'
-        });
+       resolver += data.name + ' {\n';
+       _.each(data.fields, (field) => {
+           schema += '\t' + field.type +'\n';
+           resolver += '\t' + field.type + ': ' + field.name + ',\n'
+       });
 
-        schema += '}';
-        resolver += '}';
+       schema += '}';
+       resolver += '}';
 
-        var result = schema + '\n\n' + resolver;
-        return result;
-    }
+       var result = schema + '\n\n' + resolver;
+       return result;
+   }
 
     _constructGraphQL(data, fromStruct) {
-        if (fromStruct) {
-          return this._constructGraphQLStruct(data);
-        } else {
-          return this._constructGraphQLEnum(data);
+        if (data) {
+            if (fromStruct) {
+              return this._constructGraphQLStruct(data);
+            } else {
+              return this._constructGraphQLEnum(data);
+            }
         }
     }
 
@@ -209,26 +213,100 @@ export class ThriftConverter extends React.Component {
         var extracted = null;
         var data = this.state.thriftInput;
         // start with struct
-        var isStruct = data.trim().match(/^struct/g);
-        if (isStruct) {
-            extracted = this._extractStruct(data);
-        } else {
-            
-            // start with enum
-            extracted = this._extractEnum(data);
-            console.log('==>>>> extracted: ', extracted);
+        var isStruct = (data.trim().match(/struct/g) || []).length > 0;
+        var isEnum = (data.trim().match(/enum/g) || []).length > 0;
 
-        }
+        console.log('=====: isStruct: ', isStruct);
+        console.log('<<<<<: isEnum: ', isEnum);
+        var covertorOutput = '';
+        console.log('====>>> data: ', data);
+        if (isStruct && isEnum) {
+            covertorOutput = 'The struct and enum cannot be mixed';
+        } else if (isStruct) {
+            let structCount = (data.match(/struct/g) || []).length;
+            console.log('===>>> structCount: ', structCount);
+            if (structCount === 0) {
+                covertorOutput = 'Neither struct nor enum';
+            } else if (structCount === 1) {
+                // normal extract
+                console.log('===>>> structCount: ', structCount);
+                let extracted = this._extractStruct(data);
+                covertorOutput = this._constructGraphQL(extracted, isStruct);
+            } else {
+                // structCount > 1
+                let structStrArr = data.split('struct');
+                console.log('===>>> structCount: ', structCount);
+                console.log('--->>> structStrArr: ', structStrArr);
+                structStrArr = structStrArr.map(elem=> {
+                    if (elem && elem.includes('{')) {
+                        elem = 'struct ' + elem;
+                        return elem;
+                    }
+                });
+                console.log('<<<>>>: ', structStrArr);
 
-        var graphOutput = '';
-        if (extracted) {
-            graphOutput = this._constructGraphQL(extracted, isStruct);
+                let extractedArr = structStrArr.map(elem => {
+                    if (elem) {
+                        return this._extractStruct(elem);
+                    }
+                });
+                console.log('@@@@@@: ', extractedArr);
+                let convertedOutputArr = extractedArr.map(elem => {
+                    return this._constructGraphQL(elem, isStruct);
+                });
+                console.log('!!!!!!!!: ', extractedArr);
+                convertedOutputArr.forEach(elem => {
+                    if (elem) {
+                        covertorOutput += elem + '\n\n';
+                    }
+                });
+            }
+        } else if (isEnum) {
+            let enumCount = (data.match(/enum/g) || []).length;
+            console.log('===>>> enumCount: ', enumCount);
+            if (enumCount === 0) {
+                covertorOutput = 'Neither struct nor enum';
+            } else if (enumCount === 1) {
+                // normal extract
+                console.log('===>>> enumCount: ', enumCount);
+                let extracted = this._extractEnum(data);
+                covertorOutput = this._constructGraphQL(extracted, isStruct);
+            } else {
+                // enumCount > 1
+                let enumStrArr = data.split('enum');
+                console.log('===>>> enumCount: ', enumCount);
+                console.log('--->>> enumStrArr: ', enumStrArr);
+                enumStrArr = enumStrArr.map(elem=> {
+                    if (elem && elem.includes('{')) {
+                        elem = 'enum ' + elem;
+                        return elem;
+                    }
+                });
+                console.log('<<<>>>: ', enumStrArr);
+
+                let extractedArr = enumStrArr.map(elem => {
+                    if (elem) {
+                        return this._extractEnum(elem);
+                    }
+                });
+                console.log('@@@@@@: ', extractedArr);
+                let convertedOutputArr = extractedArr.map(elem => {
+                    return this._constructGraphQL(elem, isStruct);
+                });
+                console.log('!!!!!!!!: ', extractedArr);
+                convertedOutputArr.forEach(elem => {
+                    if (elem) {
+                        covertorOutput += elem + '\n\n';
+                    }
+                });
+            }
+
         } else {
-            graphOutput = 'Something wrong with the thrift input..'
+            covertorOutput = 'Neither struct nor enum';
         }
 
         this.setState({
-            graphOutput: graphOutput,
+            graphOutput: covertorOutput,
             copied: false
         });
     }
@@ -246,9 +324,8 @@ export class ThriftConverter extends React.Component {
                 </span>
                 <p><b>Thrift to GraphQL schema converter</b></p>
                 <div>
-                  <p>Usage:</p>
-                  <p>1 This tool only supports one struct or one enum every time</p>
-                  <p>2 Comments will be deleted after converting</p>
+                  <p>Note:</p>
+                  <p>Comments will be deleted after converting</p>
                 </div>
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'row' }}>
                     <textarea rows='50' cols='50' name="comment"
