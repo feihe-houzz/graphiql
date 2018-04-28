@@ -12,6 +12,7 @@ export class ResultStatusBar extends React.Component {
 
     constructor(props) {
         super();
+        this.checkPerformanceOnZipkin = this.checkPerformanceOnZipkin.bind(this);
     }
 
     shouldComponentUpdate(nextProps) {
