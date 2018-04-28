@@ -176,15 +176,23 @@ export class ThriftConverter extends React.Component {
     }
 
     _constructGraphQLEnum(data) {
+        // console.log('===>>> data: ', data);
         var schema = '';
+        var resolver='';
+
         schema += 'enum ' + data.name + ' {\n';
+
+        resolver += data.name + ' {\n';
         _.each(data.fields, (field) => {
             schema += '\t' + field.type +'\n';
+            resolver += '\t' + field.type + ': ' + field.name + ',\n'
         });
 
         schema += '}';
+        resolver += '}';
 
-        return schema;
+        var result = schema + '\n\n' + resolver;
+        return result;
     }
 
     _constructGraphQL(data, fromStruct) {
@@ -205,8 +213,11 @@ export class ThriftConverter extends React.Component {
         if (isStruct) {
             extracted = this._extractStruct(data);
         } else {
+            
             // start with enum
             extracted = this._extractEnum(data);
+            console.log('==>>>> extracted: ', extracted);
+
         }
 
         var graphOutput = '';

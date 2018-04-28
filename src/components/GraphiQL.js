@@ -825,17 +825,17 @@ export class GraphiQL extends React.Component {
                 let snapBC = snapData.browserCookies;
                 let snapMC = snapData.mobileCookies;
 
-                console.log('====: ids: ', snapId);
-                console.log('====: query: ', snapQuery);
-                console.log('====: response: ', snapRes);
-                console.log('====: snapV: ', snapV);
-                console.log('====: snapBC: ', snapBC);
-                console.log('====: snapMC: ', snapMC);
+                // console.log('====: ids: ', snapId);
+                // console.log('====: query: ', snapQuery);
+                // console.log('====: response: ', snapRes);
+                // console.log('====: snapV: ', snapV);
+                // console.log('====: snapBC: ', snapBC);
+                // console.log('====: snapMC: ', snapMC);
                 let mobileModeEnabled = false;
 
                 let snapResponse = JSON.parse(snapRes);
-                console.log('======= snapResponse: ', snapResponse);
-                console.log('~~~~~~ ack: ', snapResponse.Ack);
+                // console.log('======= snapResponse: ', snapResponse);
+                // console.log('~~~~~~ ack: ', snapResponse.Ack);
                 mobileModeEnabled = mobileModeEnabled || snapMC || (snapResponse && snapResponse.Ack);
                 console.log('mobileModeEnabled: ', mobileModeEnabled);
 
