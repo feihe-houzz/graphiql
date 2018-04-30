@@ -74,7 +74,7 @@ export class ResultStatusBar extends React.Component {
         return (
             <div className="variable-editor">
             <div
-            className="variable-editor-title"
+            className="resultStatusBar"
             >
             {'Status'} | &nbsp;
             <span onClick={this.checkPerformanceOnZipkin}>
