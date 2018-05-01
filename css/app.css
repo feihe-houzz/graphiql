@@ -37,6 +37,10 @@
   font-size: 18px;
 }
 
+.graphiql-container .titleVersion {
+  font-size: 14px;
+}
+
 .graphiql-container .title em {
   font-family: georgia;
   font-size: 19px;

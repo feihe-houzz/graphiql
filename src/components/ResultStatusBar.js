@@ -61,12 +61,16 @@ export class ResultStatusBar extends React.Component {
         var response, perfData, zipkin;
         var perfCounters = {};
         if (this.props.value) {
-            response = JSON.parse(this.props.value);
-            perfData = response && response._gtrace ? response._gtrace.perfData : null;
-            this.zipKin = response && response._gtrace ? response._gtrace.zipKin : null;
+            try {
+                response = JSON.parse(this.props.value);
+                perfData = response && response._gtrace ? response._gtrace.perfData : null;
+                this.zipKin = response && response._gtrace ? response._gtrace.zipKin : null;
 
-            console.log('status bar got response: ', perfData);
-            perfCounters = this.perfCounters(perfData, ['sql_reads_slave', 'redis_reads_']);
+                console.log('status bar got response: ', perfData);
+                perfCounters = this.perfCounters(perfData, ['sql_reads_slave', 'redis_reads_']);
+            } catch (e) {
+                console.log('ResultStatusBar: json parsing exception');
+            }
         }
 
         console.log('perfCounters: ', perfCounters);

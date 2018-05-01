@@ -1294,7 +1294,7 @@ export class GraphiQL extends React.Component {
 GraphiQL.Logo = function GraphiQLLogo(props) {
   return (
     <div className="title">
-      {props.children || <span>{'Grap'}<em>{'h'}</em>{'ouzz'}</span>}
+      {props.children || <span>{'Grap'}<em>{'h'}</em>{'ouzz'} <span className='titleVersion'>v1.1</span></span>}
     </div>
   );
 };
