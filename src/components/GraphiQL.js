@@ -853,11 +853,16 @@ export class GraphiQL extends React.Component {
                 console.log('mobileModeEnabled: ', mobileModeEnabled);
                 console.log('===>>> mobileCookieStore: ', snapMC);
 
+
                 if (mobileModeEnabled) {
                     this.setState({
                         mobileMode: true
                     });
+                    let curMobileHeaders = JSON.parse(snapMC);
+                    console.log('===>>>> curMobileHeaders: ', curMobileHeaders);
+                    this.handleMobileActivateFn(true, curMobileHeaders);
                 }
+
 
                 // show snapshot query, variables, response
                 this.setState({
