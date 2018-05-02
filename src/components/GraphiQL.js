@@ -860,7 +860,8 @@ export class GraphiQL extends React.Component {
                     });
                     let curMobileHeaders = JSON.parse(snapMC);
                     console.log('===>>>> curMobileHeaders: ', curMobileHeaders);
-                    this.handleMobileActivateFn(true, curMobileHeaders);
+                    // update _headers
+                    this._headers = curMobileHeaders;
                 }
 
 
@@ -877,7 +878,6 @@ export class GraphiQL extends React.Component {
             }
           }
       );
-
   }
 
   handleClickReference = reference => {
