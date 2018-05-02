@@ -155,6 +155,7 @@ export class GraphiQL extends React.Component {
       mobileCookieStore: '',
       browserCookieStore: '',
       fromSnapshot: false,
+      mobileHeaderStore: '',
       snapshotURL: '',
       ...queryFacts
     };
@@ -383,6 +384,7 @@ export class GraphiQL extends React.Component {
         <ThriftConverter show={this.state.thriftDiagOpen} onClose={() => this.setState({ thriftDiagOpen: false })} />
         <Mobile
             mobileCookieStore={this.state.mobileCookieStore}
+            mobileHeaderStore={this.state.mobileHeaderStore}
             fromSnapshot = {this.state.fromSnapshot}
             show={this.state.mobileDiagOpen}
             onClose={() => this.setState({ mobileDiagOpen: false })}
@@ -738,8 +740,19 @@ export class GraphiQL extends React.Component {
       let curVariables =  JSON.stringify(this.state.variables) || " ";
       let curRes =  JSON.stringify(this.state.response) || " ";
       let curMCookies = JSON.stringify(this.state.mobileCookieStore);
-      let curBCookies = JSON.stringify(document.cookie);
+      let curMHeaders = this.state.mobileHeaderStore ? JSON.stringify(this.state.mobileHeaderStore) : null;
+    //   let curBCookies = JSON.stringify(document.cookie);
+      let curBCookies = null;
 
+      if (this.state.mobileHeaderStore) {
+          console.log('==== typeof mobileHeaderStore: ', typeof this.state.mobileHeaderStore);
+          console.log('==== mobileHeaderStore: ',this.state.mobileHeaderStore);
+      }
+
+      console.log('====>>> curMHeaders: ', curMHeaders);
+       console.log('====>>> type of curMHeaders: ', typeof curMHeaders);
+
+      // replace the mobileCookies with curMHeaders
       if (curQuery && curQuery.includes('{')) {
           let snapshotQuery = `
               mutation {
@@ -747,7 +760,7 @@ export class GraphiQL extends React.Component {
                   query: ${curQuery},
                   variables: ${curVariables},
                   response: ${curRes},
-                  mobileCookies: ${curMCookies},
+                  mobileCookies: ${curMHeaders},
                   browserCookies: ${curBCookies}
                 }) {
                   status
@@ -830,7 +843,7 @@ export class GraphiQL extends React.Component {
                 // console.log('====: response: ', snapRes);
                 // console.log('====: snapV: ', snapV);
                 // console.log('====: snapBC: ', snapBC);
-                // console.log('====: snapMC: ', snapMC);
+                console.log('====: snapMC: ', snapMC);
                 let mobileModeEnabled = false;
 
                 let snapResponse = JSON.parse(snapRes);
@@ -838,6 +851,7 @@ export class GraphiQL extends React.Component {
                 // console.log('~~~~~~ ack: ', snapResponse.Ack);
                 mobileModeEnabled = mobileModeEnabled || snapMC || (snapResponse && snapResponse.Ack);
                 console.log('mobileModeEnabled: ', mobileModeEnabled);
+                console.log('===>>> mobileCookieStore: ', snapMC);
 
                 if (mobileModeEnabled) {
                     this.setState({
@@ -851,6 +865,7 @@ export class GraphiQL extends React.Component {
                     variables: snapV,
                     response: snapRes,
                     mobileCookieStore: snapMC,
+                    mobileHeaderStore: snapMC,
                     fromSnapshot: true
                 });
 
@@ -1104,7 +1119,8 @@ export class GraphiQL extends React.Component {
             mobileDiagOpen: !this.state.mobileDiagOpen,
             mobileMode: activated,
             browserCookieStore: browserCookies,
-            mobileCookieStore: headers['MOBILE-COOKIE']
+            mobileCookieStore: headers['MOBILE-COOKIE'],
+            mobileHeaderStore: JSON.stringify(headers)
         });
     } else {
         // restore browse cookies
@@ -1129,6 +1145,7 @@ export class GraphiQL extends React.Component {
             mobileDiagOpen: !this.state.mobileDiagOpen,
             mobileMode: activated,
             mobileCookieStore: '',
+            mobileHeaderStore: '',
             browserCookieStore: document.cookie
         });
 

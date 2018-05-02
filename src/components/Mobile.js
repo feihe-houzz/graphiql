@@ -27,6 +27,7 @@ var ToastMessageFactory = React.createFactory(ReactToastr.ToastMessage.animation
 export class Mobile extends React.Component {
     static propTypes = {
       mobileCookieStore: PropTypes.string,
+      mobileHeaderStore: PropTypes.string,
       fromSnapshot: PropTypes.bool
     }
 
@@ -88,18 +89,21 @@ export class Mobile extends React.Component {
         this.toast = this.toast.bind(this);
     }
 
-
     componentDidMount() {
     }
 
     componentDidUpdate() {
         if (!this.state.initialized &&
-            this.props.mobileCookieStore &&
+            this.props.mobileHeaderStore &&
             this.props.fromSnapshot) {
             this.setState({
                 initialized: true
             });
-            this.updateHeader('MOBILE-COOKIE', this.props.mobileCookieStore);
+            console.log('====>>>> this.props.mobileHeaders: ', this.props.mobileHeaderStore);
+            let snapshotMobileHeaders = JSON.parse(this.props.mobileHeaderStore);
+
+            this.updateHeaderBatch(snapshotMobileHeaders);
+
         }
     }
 
@@ -147,7 +151,7 @@ export class Mobile extends React.Component {
         console.log('#######: ', host);
         let curPassword = '';
         if (host.includes('houzz.com') && !host.includes('stghouzz.com')) {
-            curPassword = this.status.password;
+            curPassword = this.state.password;
         } else {
             curPassword = 'eciaa310';
         }
@@ -196,6 +200,24 @@ export class Mobile extends React.Component {
             }
         });
         console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
+        this.setState({
+            mobileHeaders: curHeaders
+        });
+    }
+
+    updateHeaderBatch(headerObj) {
+        let curHeaders = this.state.mobileHeaders;
+        if (headerObj) {
+            for (let name in headerObj) {
+                let value = headerObj[name];
+                curHeaders.forEach(elem => {
+                    if (elem && elem.name === name) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
         this.setState({
             mobileHeaders: curHeaders
         });
@@ -293,30 +315,3 @@ export class Mobile extends React.Component {
     }
 
 }
-
-/*
-// make sure that the we wanna use the mobile-cookie to override the browserCookie
-if (header.name === 'MOBILE-COOKIE' ) {
-    if (this.state.onlyMobileCookies) {
-        headers[header.name] = 'override=true;';
-    } else {
-        headers[header.name] = 'override=false;';
-    }
-    headers[header.name] += header.value;
-} else {
-
-}
-
-<div>
-    <label style={{minWidth: '1400'}}>
-        Only Mobile Cookies?
-        <input
-            name="onlyMobileCookies"
-            type="checkbox"
-
-            checked={this.state.onlyMobileCookies}
-            onChange={this.handleInputChange} />
-    </label>
-</div>
-
-*/
