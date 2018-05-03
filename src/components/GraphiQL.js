@@ -317,7 +317,7 @@ export class GraphiQL extends React.Component {
         <ToolbarButton
           onClick={this.handleToggleUnitTestAutoGen}
           title="Unit Test Auto Generation"
-          label="Unit Test Auto-Gen"
+          label="Unit Test"
         />
 
         <ToolbarButton
