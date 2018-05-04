@@ -44,10 +44,10 @@ export class SnapshotShare extends React.Component {
                     <p><b> Snapshot URL </b></p>
                     <div style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
 
-                         <textarea rows='1' cols='120' name="comment" readOnly={true}
-                             style={{ padding: '0px', width: '90%', fontSize: '16px' }}
+                         <input rows='1'cols='120' name="comment" readOnly={true}
+                             style={{ display: 'inline', padding: '0px', width: '90%', fontSize: '16px', border: '0px' }}
                              value={url}>
-                         </textarea>
+                         </input>
                     </div>
 
                 </div>
@@ -59,6 +59,8 @@ export class SnapshotShare extends React.Component {
 
 //<Button bsStyle="primary">CopyToClipboard</Button>
 /*
+
+
 <label>
 {url}
 </label>
