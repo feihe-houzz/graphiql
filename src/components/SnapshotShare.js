@@ -42,11 +42,12 @@ export class SnapshotShare extends React.Component {
                         &times;
                     </span>
                     <p><b> Snapshot URL </b></p>
-
                     <div style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
-                        <label>
-                        {url}
-                        </label>
+
+                         <textarea rows='1' cols='120' name="comment" readOnly={true}
+                             style={{ padding: '0px', width: '90%', fontSize: '16px' }}
+                             value={url}>
+                         </textarea>
                     </div>
 
                 </div>
@@ -57,7 +58,12 @@ export class SnapshotShare extends React.Component {
 }
 
 //<Button bsStyle="primary">CopyToClipboard</Button>
-
+/*
+<label>
+{url}
+</label>
+ <input style={minWidth: '100'} type="text" value={url}/>
+*/
 /*
 <div className="static-modal" style={modalStyle}>
 
