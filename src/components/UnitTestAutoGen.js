@@ -51,11 +51,13 @@ export class UnitTestAutoGen extends React.Component {
         if (!queryObj.operationName) {
             queryObj.operationName = null;
         }
+
+        let opNameStr = queryObj.operationName ? '"' + queryObj.operationName + '"' : null;
         let str = '{' + '\n' +
         '    ' +  'query: '  +
         '\n       \`'+ queryObj.query + '\`'+ ',\n' +
         '    ' + 'variables: ' + queryObj.variables + ',\n'  +
-        '    ' + 'operationName: ' + queryObj.operationName +
+        '    ' + 'operationName: ' + opNameStr +
         '\n}';
         return str;
     }
