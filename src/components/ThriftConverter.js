@@ -184,7 +184,7 @@ export class ThriftConverter extends React.Component {
 
        schema += 'enum ' + data.name + ' {\n';
 
-       resolver += data.name + ' {\n';
+       resolver += data.name + ':'+ ' {\n';
        _.each(data.fields, (field) => {
            schema += '\t' + field.type +'\n';
            resolver += '\t' + field.type + ': ' + field.name + ',\n'
