@@ -386,6 +386,7 @@ export class GraphiQL extends React.Component {
             mobileCookieStore={this.state.mobileCookieStore}
             mobileHeaderStore={this.state.mobileHeaderStore}
             fromSnapshot = {this.state.fromSnapshot}
+            executeQuery={this._fetchQuery.bind(this)}
             show={this.state.mobileDiagOpen}
             onClose={() => this.setState({ mobileDiagOpen: false })}
             mobileActivateFn={this.handleMobileActivateFn}/>

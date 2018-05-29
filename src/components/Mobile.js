@@ -28,7 +28,8 @@ export class Mobile extends React.Component {
     static propTypes = {
       mobileCookieStore: PropTypes.string,
       mobileHeaderStore: PropTypes.string,
-      fromSnapshot: PropTypes.bool
+      fromSnapshot: PropTypes.bool,
+      executeQuery: PropTypes.func
     }
 
     constructor(props) {
@@ -133,8 +134,6 @@ export class Mobile extends React.Component {
         }
     }
 
-
-
     toast(msg, method) {
       this.refs.container[method](
           "",
@@ -144,6 +143,37 @@ export class Mobile extends React.Component {
       );
     }
 
+    getTokens2(user) {
+        const exeQueryFn = this.props.executeQuery;
+
+        let host = apiHelper.getHost();
+        let curPassword = '';
+        if (host.includes('houzz.com') && !host.includes('stghouzz.com')) {
+            curPassword = this.state.password;
+        } else {
+            curPassword = 'eciaa310';
+        }
+
+        let userName = JSON.stringify(user);
+        let password = JSON.stringify(curPassword);
+        let getSSLTokenQuery = `
+        query getSSLToken {
+            getSSLToken(userName: ${userName}, password: ${password})
+        } `;
+
+        exeQueryFn(getSSLTokenQuery, null, null, null,
+            result => {
+            // console.log('result: ', result);
+            if (result && result.data && result.data.getSSLToken) {
+                let SSLToken = result.data.getSSLToken;
+                this.updateHeader('X-HOUZZ-API-SSL-TOKEN', SSLToken);
+            } else {
+                this.updateHeader('X-HOUZZ-API-SSL-TOKEN', 'Error in getSSLToken');
+            }
+        });
+    }
+
+    // this no longer used, will delete later
     getTokens(user) {
         let url = apiHelper.getUrl('format=json&version=185&app=test1&method=getToken');
         console.log('$$$$ url: ', url);
@@ -301,7 +331,7 @@ export class Mobile extends React.Component {
 
                             // var username2 = this.refs['X-HOUZZ-API-USER-NAME'].value;
                             // console.log('==>> username2: ', username2);
-                            this.getTokens(username)
+                            this.getTokens2(username)
                         }}>
                         getSSLToken
                     </div>
