@@ -96,8 +96,11 @@
       // When the query and variables string is edited, update the URL bar so
       // that it can be easily shared
       function onEditQuery(newQuery) {
-        parameters.query = newQuery;
-        updateURL();
+        //  console.log('====>>> newQuery.length: ', newQuery.length);
+        if (newQuery.length < 2000) {
+           parameters.query = newQuery;
+           updateURL();
+        }
       }
 
       function onEditVariables(newVariables) {
