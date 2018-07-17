@@ -1,100 +1,132 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('lodash');
+const _ = require('lodash');
+import { ToastContainer, toast } from 'react-toastify';
+
 
 /**
  * ResultStatusBar
  */
 export class ResultStatusBar extends React.Component {
-    static propTypes = {
-        value: PropTypes.string
-    }
+  static propTypes = {
+    value: PropTypes.string
+  }
 
-    constructor(props) {
-        super();
-        this.checkPerformanceOnZipkin = this.checkPerformanceOnZipkin.bind(this);
-    }
+  constructor(props) {
+    super();
+    this.checkPerformanceOnZipkin = this.checkPerformanceOnZipkin.bind(this);
+  }
 
-    shouldComponentUpdate(nextProps) {
-        return this.props.value !== nextProps.value;
-    }
+  /*
+  shouldComponentUpdate(nextProps) {
+    return this.props.value !== nextProps.value;
+  }*/
 
-    componentDidMount() {
-    }
+  componentDidMount() {
+  }
 
-    componentDidUpdate(prevProps) {
-    }
+  componentDidUpdate(prevProps) {
+      console.log('status updated!!');
+  }
 
-    componentWillUnmount() {
-    }
+  componentWillUnmount() {
+      console.log('ResultStatusBar will unmount');
+  }
 
-    checkPerformanceOnZipkin() {
-        var zipKin = this.zipKin;
-        var traceId = zipKin ? zipKin.traceId : 'unknown';
-        var win = window.open('https://zipkin-police.stghouzz.com/zipkin/traces/' + traceId, '_blank');
-        win.focus();
-    }
+  checkPerformanceOnZipkin() {
+    const zipKin = this.zipKin;
+    const traceId = zipKin ? zipKin.traceId : 'unknown';
+    const win = window.open('https://zipkin-police.stghouzz.com/zipkin/traces/' + traceId, '_blank');
+    win.focus();
+  }
 
-    perfCounters(perfData, metricNames) {
-        var countersMap = {};
-        _.each(perfData, (perServicePerfData, serviceName) => {
+  perfCounters(perfData, metricNames) {
+    const countersMap = {};
+    _.each(perfData, (perServicePerfData, serviceName) => {
 
-            _.each(perServicePerfData, (perMetricData, metricDataName) => {
-                metricNames.map(metricName => {
-                    if (metricDataName.includes(metricName)) {
-                        if (perMetricData) {
-                            if (!countersMap[metricName]) {
-                                countersMap[metricName] = 0;
-                            }
-                            countersMap[metricName] += perMetricData.counts;
-                        }
-                    }
-                });
-            });
-
-        })
-
-        return countersMap;
-    }
-
-    render() {
-        var response, perfData, zipkin;
-        var perfCounters = {};
-        if (this.props.value) {
-            try {
-                response = JSON.parse(this.props.value);
-                perfData = response && response._gtrace ? response._gtrace.perfData : null;
-                this.zipKin = response && response._gtrace ? response._gtrace.zipKin : null;
-
-                console.log('status bar got response: ', perfData);
-                perfCounters = this.perfCounters(perfData, ['sql_reads_slave', 'redis_reads_']);
-            } catch (e) {
-                console.log('ResultStatusBar: json parsing exception');
+      _.each(perServicePerfData, (perMetricData, metricDataName) => {
+        metricNames.map(metricName => {
+          if (metricDataName.includes(metricName)) {
+            if (perMetricData) {
+              if (!countersMap[metricName]) {
+                countersMap[metricName] = 0;
+              }
+              countersMap[metricName] += perMetricData.counts;
             }
-        }
+          }
+        });
+      });
 
-        console.log('perfCounters: ', perfCounters);
+    });
 
-        return (
-            <div className="variable-editor">
-            <div
-            className="resultStatusBar"
-            >
-            {'Status'} | &nbsp;
+    return countersMap;
+  }     
+
+  render() {
+    let response, perfData, zipkin;
+    let perfCounters = {};
+    if (this.props.value) {
+      try {
+        response = JSON.parse(this.props.value);
+        
+        if (response && response._gtrace) {
+            perfData = response._gtrace.perfData;
+            this.zipKin = response._gtrace.zipKin;        
+
+            console.log('status bar got response: ', perfData);
+            perfCounters = this.perfCounters(perfData, [ 'sql_reads_slave', 'redis_reads_' ]);
+            
+            // non-batching call detection
+            const qLB = response._gtrace.Q_LB;
+            var uniqResolverNames = {};
+            _.each(qLB, (uniqResolvers, queryPath) => {
+                if (uniqResolvers.length > 1 ) {
+                    uniqResolvers.map(uniqResolver => {
+                        uniqResolverNames[uniqResolver.split('-')[0]] = null;
+                    })                                        
+                }             
+            });
+                        
+            const msg = "Un-batched resolvers: \n" + JSON.stringify(Object.keys(uniqResolverNames));                                                    
+            setTimeout(() => {
+                console.log('>> about to warn!');
+                alert(msg);
+                /* XXX - this doesn't work
+                toast.warn(msg, {
+                    position: toast.POSITION.TOP_CENTER,
+                    autoClose: 6000
+                }); 
+                */
+            }, 1000);                  
+        }    
+        
+      } catch (e) {
+        console.log('ResultStatusBar: json parsing exception');
+      }
+    }
+
+    console.log('perfCounters: ', perfCounters);
+
+    return (
+      <div className="variable-editor">
+        <div
+          className="resultStatusBar">
+          {'Status'} | &nbsp;
             <span onClick={this.checkPerformanceOnZipkin}>
                 SQL: {perfCounters.sql_reads_slave} -
                 REDIS: {perfCounters.redis_reads_}
             </span>
-            </div>
-            </div>
-        );
-    }
+        </div>
+        <ToastContainer />                
+      </div>
+    );
+  }
 
 
     /**
     * Public API for retrieving the DOM client height for this component.
     */
-    getClientHeight() {
-        return this._node && this._node.clientHeight;
-    }
+  getClientHeight() {
+    return this._node && this._node.clientHeight;
+  }
 }
