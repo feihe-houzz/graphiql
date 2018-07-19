@@ -86,18 +86,20 @@ export class ResultStatusBar extends React.Component {
                     })                                        
                 }             
             });
-                        
-            const msg = "Un-batched resolvers: \n" + JSON.stringify(Object.keys(uniqResolverNames));                                                    
-            setTimeout(() => {
-                console.log('>> about to warn!');
-                alert(msg);
-                /* XXX - this doesn't work
-                toast.warn(msg, {
-                    position: toast.POSITION.TOP_CENTER,
-                    autoClose: 6000
-                }); 
-                */
-            }, 1000);                  
+
+            var uniqResolverNames = Object.keys(uniqResolverNames);
+            const msg = "Un-batched resolvers: \n" + JSON.stringify(uniqResolverNames);
+            if (uniqResolverNames && uniqResolverNames.length > 0) {
+                setTimeout(() => {
+                    alert(msg);
+                    /* XXX - this doesn't work
+                    toast.warn(msg, {
+                        position: toast.POSITION.TOP_CENTER,
+                        autoClose: 6000
+                    }); 
+                    */
+                }, 1000);              
+            }                   
         }    
         
       } catch (e) {
