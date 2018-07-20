@@ -4,14 +4,6 @@
  *
  */
 
-import React from 'react';
-import _ from 'lodash';
-import PropTypes from 'prop-types';
-import apiHelper from '../utility/apiHelper';
-var ReactToastr = require("react-toastr");
-var {ToastContainer} = ReactToastr; // This is a React Element.
-var ToastMessageFactory = React.createFactory(ReactToastr.ToastMessage.animation);
-// import { Button } from 'react-bootstrap';
 
 /**
  * Mobile mode and mobile header dialogue
@@ -22,6 +14,17 @@ var ToastMessageFactory = React.createFactory(ReactToastr.ToastMessage.animation
  *   Headers will be honored for authenitcation, and response field will be UpperCase style for mobile client compatibility
  * - When modal button 'deactivate' is clicked, headers will be ignored, and normal camelCase response is resumed.
  */
+
+import React from 'react';
+import _ from 'lodash';
+import PropTypes from 'prop-types';
+import apiHelper from '../utility/apiHelper';
+var ReactToastr = require("react-toastr");
+var {ToastContainer} = ReactToastr; // This is a React Element.
+var ToastMessageFactory = React.createFactory(ReactToastr.ToastMessage.animation);
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+// import { Button } from 'react-bootstrap';
+
 
 
 export class Mobile extends React.Component {
@@ -78,11 +81,20 @@ export class Mobile extends React.Component {
             }
         ];
 
+        this.ivyHeaders = [
+            {
+                name: 'x-ivyuser',
+                value: '131,9691,9682'
+            }
+        ];
+
         this.state = {
             mobileHeaders: this.headers,
+            ivyHeaders: this.ivyHeaders,
             onlyMobileCookies: true,
             password: '',
-            initialized: false
+            initialized: false,
+            tabIndex: 0
         };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -123,6 +135,7 @@ export class Mobile extends React.Component {
     handleChange(event) {
         console.log('event name: ', event.target.name);
         console.log('event value:', event.target.value);
+        console.log('+++++++++++++++++++ panel index: ', this.state.tabIndex);
         let name = event.target.name;
         let value = event.target.value;
         if (name === 'password') {
@@ -143,7 +156,7 @@ export class Mobile extends React.Component {
       );
     }
 
-    getTokens2(user) {
+    getTokens(user) {
         const exeQueryFn = this.props.executeQuery;
 
         let host = apiHelper.getHost();
@@ -173,66 +186,32 @@ export class Mobile extends React.Component {
         });
     }
 
-    // this no longer used, will delete later
-    getTokens(user) {
-        let url = apiHelper.getUrl('format=json&version=185&app=test1&method=getToken');
-        console.log('$$$$ url: ', url);
-        let host = apiHelper.getHost();
-        console.log('#######: ', host);
-        let curPassword = '';
-        if (host.includes('houzz.com') && !host.includes('stghouzz.com')) {
-            curPassword = this.state.password;
-        } else {
-            curPassword = 'eciaa310';
-        }
-
-        console.log('$$$$ password: ', curPassword);
-        let body = 'otherApp=&username='+user+'&pwd='+ curPassword;
-
-        // console.log('========== body: ', body);
-        let options = {
-            method: 'post',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'compress': false,
-            },
-            body: body,
-        };
-
-        apiHelper.fetchUrlPost(url, options).then(res => {
-            console.log('res=>>> : ', res);
-            if (res.Ack === 'Success') {
-                let userName = res.Username;
-                let SSLToken = res.SSLAuthToken;
-                console.log('--> userName: ',userName);
-                console.log('--< SSLToken: ', SSLToken);
-                console.log('<<<<<<>>>>>>>> this: ', this);
-                this.updateHeader('X-HOUZZ-API-SSL-TOKEN', SSLToken);
-            } else {
-                if (res.Ack === 'Error') {
-                    //this.toast(res.ShortMessage, 'Please make sure the username and password are valid');
-                    // console.log('$$$$$$ res: ', res);
-                }
-            }
-            return res;
-        }).catch(err => {
-            console.log('err==<<: ', err);
-            // this.toast(err.name, 'error');
-        });
-    }
-
     updateHeader(name, value) {
-        let curHeaders = this.state.mobileHeaders;
-        curHeaders.forEach(elem => {
-            if (elem && elem.name === name) {
-                elem.value = value;
-            }
-        });
-        console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
-        this.setState({
-            mobileHeaders: curHeaders
-        });
+        if (this.state.tabIndex === 0) {
+            let curHeaders = this.state.mobileHeaders;
+            curHeaders.forEach(elem => {
+                if (elem && elem.name === name) {
+                    elem.value = value;
+                }
+            });
+            console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
+            this.setState({
+                mobileHeaders: curHeaders
+            });
+        } else if (this.state.tabIndex === 1) {
+            let curHeaders = this.state.ivyHeaders;
+            curHeaders.forEach(elem => {
+                if (elem && elem.name === name) {
+                    elem.value = value;
+                }
+            });
+            console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
+            this.setState({
+                ivyHeaders: curHeaders
+            });
+        } else {
+            // reserved, currently, do nothing. 
+        }
     }
 
     updateHeaderBatch(headerObj) {
@@ -269,40 +248,88 @@ export class Mobile extends React.Component {
 
         var headerFields = [];
         _.each(this.state.mobileHeaders, function(header) {
-            // console.log('%%%%%%%%%%%%%%%%%%%%%%: ', this);
             if (header.name === 'X-HOUZZ-API-USER-NAME') {
                 headerFields.push(
                     <div className='mobile-field'>
-                        <div style={{width: '260'}}>{header.name}</div>
+                        <div style={{width: '260', marginLeft: '10'}}>{header.name}</div>
                         <div style={{minWidth: '400'}}>
                         <input value={header.value} style={{width: '100'}} name={header.name} onChange={this.handleChange} />
-                        <label >
+                        <label style={{width: '230'}}>
                             Password:
                             <input type='password' placeholder='No need for staging&houzz2' value={this.state.password} style={{minWidth: '230'}} name='password' onChange={this.handleChange} />
                         </label>
                         </div>
                     </div>
+
+                );
+            } else if (header.name === 'X-HOUZZ-API-SSL-TOKEN') {
+                headerFields.push(
+                    <div className='mobile-field'>
+                        <div style={{width: '260', marginLeft: '10'}}>{header.name}</div>
+                        <input value={header.value} style={{minWidth: '400'}} name={header.name} onChange={this.handleChange} />
+                        {/* <div className='mobile-button2' onClick={() => {
+                            var username = this.getUserName();
+                            console.log("$$$$ username ", username);
+                            this.getTokens(username)
+                        }}>
+                        getSSLToken
+                    </div> */}
+                    </div>
                 );
             } else {
                 headerFields.push(
                     <div className='mobile-field'>
-                        <div style={{width: '260'}}>{header.name}</div>
+                        <div style={{width: '260', marginLeft: '10'}}>{header.name}</div>
                         <input value={header.value} style={{minWidth: '400'}} name={header.name} onChange={this.handleChange} />
                     </div>
                 );
             }
         }.bind(this));
 
+        var ivyHeaders = [];
+        _.each(this.state.ivyHeaders, function(header){
+            ivyHeaders.push(
+                <div className='mobile-field'>
+                        <div style={{width: '260', marginLeft: '10'}}>{header.name}</div>
+                        <input value={header.value} style={{minWidth: '400'}} name={header.name} onChange={this.handleChange} />
+                </div>
+            );
+        }.bind(this));
+
         return (
         <div className="mobile-modal" style={modalStyle}>
             <div className="mobile-modal-content">
-            <span className="close" onClick={() => this.props.onClose()}>
-                &times;
-            </span>
-                <p><b>Mobile mode</b></p>
-                <div style={{ width: '90%', display: 'flex', flexDirection: 'column' }}>
-                    {headerFields}
-                </div>
+                <span className="close" onClick={() => this.props.onClose()}>
+                    &times;
+                </span>
+                <p><b>Control panel</b></p>
+                <Tabs selectedIndex={this.state.tabIndex} onSelect={tabIndex => this.setState({ tabIndex })}>
+                    <TabList>
+                            <Tab>Houzz Mobile</Tab>
+                            <Tab>Ivy</Tab>
+                    </TabList>
+                    <TabPanel>
+                        <div style={{ width: '90%', display: 'flex', flexDirection: 'column' }}>
+                                {headerFields}
+                        </div>
+
+                        <div className='mobile-button2' onClick={() => {
+                                var username = this.getUserName();
+                                console.log("$$$$ username ", username);
+                                this.getTokens(username)
+                            }}>
+                            getSSLToken
+                        </div>
+
+                    </TabPanel>
+                    <TabPanel>
+                        <div style={{ width: '90%', display: 'flex', flexDirection: 'column' }}>
+                            {ivyHeaders}
+                        </div>
+                        
+                    </TabPanel>
+                </Tabs>
+
 
                 <div style={{ display: 'flex', flexDirection: 'row', marginTop: 20 }}>
                     <div className='mobile-button' onClick={() => this.props.mobileActivateFn(false)}>
@@ -310,8 +337,13 @@ export class Mobile extends React.Component {
                     </div>
                     <div className='mobile-button' onClick={() => {
                             var headers = {}
-                            _.each(this.state.mobileHeaders, function(header) {
-
+                            var inputHeaders = [];
+                            if (this.state.tabIndex === 0) {
+                                inputHeaders = this.state.mobileHeaders;
+                            } else {
+                                inputHeaders = this.state.ivyHeaders;
+                            }
+                            _.each(inputHeaders, function(header) {
                                 headers[header.name] = header.value;
 
                                 console.log("======: ", headers[header.name]);
@@ -321,21 +353,8 @@ export class Mobile extends React.Component {
                         }}>
                         activate
                     </div>
-
-                    <div className='mobile-button' onClick={() => {
-                            console.log('%%%%%%%%%% this: ', this);
-                            console.log('$$$$$$$$: ', this.state.mobileHeaders);
-
-                            var username = this.getUserName();
-                            console.log("$$$$ username ", username);
-
-                            // var username2 = this.refs['X-HOUZZ-API-USER-NAME'].value;
-                            // console.log('==>> username2: ', username2);
-                            this.getTokens2(username)
-                        }}>
-                        getSSLToken
-                    </div>
                 </div>
+
             </div>
             <ToastContainer ref="container"
                             toastMessageFactory={ToastMessageFactory}
@@ -345,3 +364,20 @@ export class Mobile extends React.Component {
     }
 
 }
+
+
+/**
+ {/* <div className='mobile-button' onClick={() => {
+        console.log('%%%%%%%%%% this: ', this);
+        console.log('$$$$$$$$: ', this.state.mobileHeaders);
+
+        var username = this.getUserName();
+        console.log("$$$$ username ", username);
+
+        // var username2 = this.refs['X-HOUZZ-API-USER-NAME'].value;
+        // console.log('==>> username2: ', username2);
+        this.getTokens(username)
+    }}>
+    getSSLToken
+</div> 
+ */

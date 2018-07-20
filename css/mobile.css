@@ -37,6 +37,16 @@
     font-size: 17px;
 }
 
+.mobile-button2 {
+    cursor: pointer; cursor: hand;
+    width: 120px;
+    margin: 10px;
+    padding: 5px 5px 5px 5px;
+    background-color: lightblue;
+    text-align: center;
+    font-size: 15px;
+}
+
 .unittest-button {
     cursor: pointer; cursor: hand;
     min-width: 120px;

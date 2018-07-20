@@ -306,7 +306,7 @@ export class GraphiQL extends React.Component {
         <ToolbarButton
           onClick={this.handleToggleMobile}
           title="Mobile mode"
-          label="Mobile"
+          label="Control Panel"
           highlighted={this.state.mobileMode}
         />
         <ToolbarButton
