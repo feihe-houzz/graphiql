@@ -302,7 +302,7 @@ export class Mobile extends React.Component {
                 <span className="close" onClick={() => this.props.onClose()}>
                     &times;
                 </span>
-                <p><b>Control panel</b></p>
+                <p><b>Headers Panel</b></p>
                 <Tabs selectedIndex={this.state.tabIndex} onSelect={tabIndex => this.setState({ tabIndex })}>
                     <TabList>
                             <Tab>Houzz Mobile</Tab>
