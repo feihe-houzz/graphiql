@@ -60,7 +60,7 @@ export class ResultStatusBar extends React.Component {
     });
 
     return countersMap;
-  }     
+  }
 
   render() {
     let response, perfData, zipkin;
@@ -68,42 +68,50 @@ export class ResultStatusBar extends React.Component {
     if (this.props.value) {
       try {
         response = JSON.parse(this.props.value);
-        
+
         if (response && response._gtrace) {
             perfData = response._gtrace.perfData;
-            this.zipKin = response._gtrace.zipKin;        
+            this.zipKin = response._gtrace.zipKin;
 
             console.log('status bar got response: ', perfData);
             perfCounters = this.perfCounters(perfData, [ 'sql_reads_slave', 'redis_reads_' ]);
-            
+
             // non-batching call detection
             const qLB = response._gtrace.Q_LB;
             var uniqResolverNames = {};
+            var servicesDeclared = 1;
             _.each(qLB, (uniqResolvers, queryPath) => {
                 if (uniqResolvers.length > 1 ) {
                     uniqResolvers.map(uniqResolver => {
-                        uniqResolverNames[uniqResolver.split('-')[0]] = null;
-                    })                                        
-                }             
+                        if (uniqResolver.servicesDeclared) {
+                            servicesDeclared = uniqResolver.servicesDeclared;
+                        } else {
+                            uniqResolverNames[uniqResolver.split('-')[0]] = null;
+                        }
+                    })
+                }
             });
 
             var uniqResolverNames = Object.keys(uniqResolverNames);
             const msg = "Un-batched resolvers: \n" + JSON.stringify(uniqResolverNames);
-            if (uniqResolverNames && uniqResolverNames.length > 0) {
+            if (uniqResolverNames && uniqResolverNames.length > 0 &&
+                // either there's only one @service, or there's multiple @service but
+                // uniq resolver calls is still a multiplier of it.
+                (servicesDeclared === 1 || uniqResolverNames.length / servicesDeclared > 1)) {
                 setTimeout(() => {
                     alert(msg);
                     /* XXX - this doesn't work
                     toast.warn(msg, {
                         position: toast.POSITION.TOP_CENTER,
                         autoClose: 6000
-                    }); 
+                    });
                     */
-                }, 1000);              
-            }                   
-        }    
-        
+                }, 1000);
+            }
+        }
+
       } catch (e) {
-        console.log('ResultStatusBar: json parsing exception');
+        console.log('ResultStatusBar: exception:', e);
       }
     }
 
@@ -119,7 +127,7 @@ export class ResultStatusBar extends React.Component {
                 REDIS: {perfCounters.redis_reads_}
             </span>
         </div>
-        <ToastContainer />                
+        <ToastContainer />
       </div>
     );
   }
