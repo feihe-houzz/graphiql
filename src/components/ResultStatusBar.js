@@ -42,18 +42,19 @@ export class ResultStatusBar extends React.Component {
 
   perfCounters(perfData, metricNames) {
     const countersMap = {};
+    metricNames.map(metricName => {
+        countersMap[metricName] = 0;
+    });
+    
     _.each(perfData, (perServicePerfData, serviceName) => {
 
       _.each(perServicePerfData, (perMetricData, metricDataName) => {
         metricNames.map(metricName => {
           if (metricDataName.includes(metricName)) {
             if (perMetricData) {
-              if (!countersMap[metricName]) {
-                countersMap[metricName] = 0;
-              }
               countersMap[metricName] += perMetricData.counts;
             }
-          }
+          } 
         });
       });
 
