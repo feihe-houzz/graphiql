@@ -78,6 +78,10 @@ export class Mobile extends React.Component {
             {
                 name: 'MOBILE-COOKIE',
                 value: ''
+            },
+            {
+                name: 'FORWARDED',
+                value: ''
             }
         ];
 
@@ -85,6 +89,10 @@ export class Mobile extends React.Component {
             {
                 name: 'x-ivyuser',
                 value: '131,9691,9682'
+            },
+            {
+                name: 'FORWARDED',
+                value: ''
             }
         ];
 
