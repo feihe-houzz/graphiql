@@ -164,7 +164,7 @@ export class Mobile extends React.Component {
       );
     }
 
-    getTokens(user) {
+    getTokens(user, app) {
         const exeQueryFn = this.props.executeQuery;
 
         let host = apiHelper.getHost();
@@ -177,9 +177,10 @@ export class Mobile extends React.Component {
 
         let userName = JSON.stringify(user);
         let password = JSON.stringify(curPassword);
+        let appName = JSON.stringify(app);
         let getSSLTokenQuery = `
         query getSSLToken {
-            getSSLToken(userName: ${userName}, password: ${password})
+            getSSLToken(userName: ${userName}, password: ${password}, appName: ${appName})
         } `;
 
         exeQueryFn(getSSLTokenQuery, null, null, null,
@@ -202,7 +203,7 @@ export class Mobile extends React.Component {
                     elem.value = value;
                 }
             });
-            console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
+            // console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
             this.setState({
                 mobileHeaders: curHeaders
             });
@@ -213,7 +214,7 @@ export class Mobile extends React.Component {
                     elem.value = value;
                 }
             });
-            console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
+            // console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
             this.setState({
                 ivyHeaders: curHeaders
             });
@@ -248,6 +249,16 @@ export class Mobile extends React.Component {
             }
         });
         return userName;
+    }
+
+    getAppName() {
+        let appName = null;
+        this.state.mobileHeaders.forEach(elem => {
+            if (elem.name === 'X-HOUZZ-API-APP-NAME') {
+                appName = elem.value;
+            }
+        });
+        return appName;
     }
 
     render() {
@@ -323,8 +334,9 @@ export class Mobile extends React.Component {
 
                         <div className='mobile-button2' onClick={() => {
                                 var username = this.getUserName();
-                                console.log("$$$$ username ", username);
-                                this.getTokens(username)
+                                var appName = this.getAppName();
+                                // console.log("$$$$ username ", username);
+                                this.getTokens(username, appName)
                             }}>
                             getSSLToken
                         </div>
@@ -354,7 +366,7 @@ export class Mobile extends React.Component {
                             _.each(inputHeaders, function(header) {
                                 headers[header.name] = header.value;
 
-                                console.log("======: ", headers[header.name]);
+                                // console.log("======: ", headers[header.name]);
                             }.bind(this));
 
                             this.props.mobileActivateFn(true, headers);
@@ -373,19 +385,3 @@ export class Mobile extends React.Component {
 
 }
 
-
-/**
- {/* <div className='mobile-button' onClick={() => {
-        console.log('%%%%%%%%%% this: ', this);
-        console.log('$$$$$$$$: ', this.state.mobileHeaders);
-
-        var username = this.getUserName();
-        console.log("$$$$ username ", username);
-
-        // var username2 = this.refs['X-HOUZZ-API-USER-NAME'].value;
-        // console.log('==>> username2: ', username2);
-        this.getTokens(username)
-    }}>
-    getSSLToken
-</div> 
- */
