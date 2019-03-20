@@ -64,6 +64,10 @@ export class Mobile extends React.Component {
                 value: '82303DFA-8EBF-447D-9AC3-7CB596959258'
             },
             {
+                name: 'X-HOUZZ-API-IDFV',
+                value: ''
+            },
+            {
                 name: 'X-HOUZZ-API-LOCALE',
                 value: 'en-US'
             },
