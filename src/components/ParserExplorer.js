@@ -53,7 +53,7 @@ export default class ImagesExplorer extends React.Component {
         result = JSON.parse(result);
         var jp = require('jsonpath');
         var parsed = jp.query(result, query);
-        console.log('parsed: ', parsed);
+        // console.log('parsed: ', parsed);
     } else {
         parsed = null;
     }
@@ -123,7 +123,7 @@ export default class ImagesExplorer extends React.Component {
   }
 
   render() {
-    console.log('query: ', this.state.query);
+    // console.log('query: ', this.state.query);
     var shortcuts = this.renderShortcuts();
     var content = this.renderResults();
 

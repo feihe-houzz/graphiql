@@ -124,7 +124,6 @@ export class Mobile extends React.Component {
             this.setState({
                 initialized: true
             });
-            console.log('====>>>> this.props.mobileHeaders: ', this.props.mobileHeaderStore);
             let snapshotMobileHeaders = JSON.parse(this.props.mobileHeaderStore);
 
             this.updateHeaderBatch(snapshotMobileHeaders);
@@ -136,18 +135,13 @@ export class Mobile extends React.Component {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-        console.log('>>>> name: ', name);
-        console.log('&&&& value: ', value);
-
+        
         this.setState({
             [name]: value
         });
     }
 
     handleChange(event) {
-        console.log('event name: ', event.target.name);
-        console.log('event value:', event.target.value);
-        console.log('+++++++++++++++++++ panel index: ', this.state.tabIndex);
         let name = event.target.name;
         let value = event.target.value;
         if (name === 'password') {
@@ -176,7 +170,7 @@ export class Mobile extends React.Component {
         if (host.includes('houzz.com') && !host.includes('stghouzz.com')) {
             curPassword = this.state.password;
         } else {
-            curPassword = 'eciaa310';
+            curPassword = 'eciaa@285';
         }
 
         let userName = JSON.stringify(user);
@@ -189,7 +183,6 @@ export class Mobile extends React.Component {
 
         exeQueryFn(getSSLTokenQuery, null, null, null,
             result => {
-            // console.log('result: ', result);
             if (result && result.data && result.data.getSSLToken) {
                 let SSLToken = result.data.getSSLToken;
                 this.updateHeader('X-HOUZZ-API-SSL-TOKEN', SSLToken);
@@ -207,7 +200,6 @@ export class Mobile extends React.Component {
                     elem.value = value;
                 }
             });
-            // console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
             this.setState({
                 mobileHeaders: curHeaders
             });
@@ -218,7 +210,6 @@ export class Mobile extends React.Component {
                     elem.value = value;
                 }
             });
-            // console.log('>>>>>>====>>>>> curHeaders: ', curHeaders);
             this.setState({
                 ivyHeaders: curHeaders
             });
@@ -290,13 +281,7 @@ export class Mobile extends React.Component {
                     <div className='mobile-field'>
                         <div style={{width: '260', marginLeft: '10'}}>{header.name}</div>
                         <input value={header.value} style={{minWidth: '400'}} name={header.name} onChange={this.handleChange} />
-                        {/* <div className='mobile-button2' onClick={() => {
-                            var username = this.getUserName();
-                            console.log("$$$$ username ", username);
-                            this.getTokens(username)
-                        }}>
-                        getSSLToken
-                    </div> */}
+                        {}
                     </div>
                 );
             } else {
@@ -339,7 +324,6 @@ export class Mobile extends React.Component {
                         <div className='mobile-button2' onClick={() => {
                                 var username = this.getUserName();
                                 var appName = this.getAppName();
-                                // console.log("$$$$ username ", username);
                                 this.getTokens(username, appName)
                             }}>
                             getSSLToken
@@ -369,8 +353,6 @@ export class Mobile extends React.Component {
                             }
                             _.each(inputHeaders, function(header) {
                                 headers[header.name] = header.value;
-
-                                // console.log("======: ", headers[header.name]);
                             }.bind(this));
 
                             this.props.mobileActivateFn(true, headers);

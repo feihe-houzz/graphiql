@@ -35,9 +35,7 @@ export class UnitTestAutoGen extends React.Component {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-        // console.log('>>>> name: ', name);
-        // console.log('&&&& value: ', value);
-
+        
         this.setState({
             [name]: value
         });
@@ -63,7 +61,6 @@ export class UnitTestAutoGen extends React.Component {
     }
 
     composeFullTest(testBody) {
-        console.log('===>>> testBody: \n', testBody);
         // massage the testString
         let testBodyMsg = testBody.replace(/\n/g, '\n            ');
 
@@ -86,7 +83,7 @@ describe('Test - ??', function() {
               this.props.onRunQuery();
             }
         }
-        // console.log('@@@@@ this.props.response: ', this.props.response);
+        
         if (!this.props.response) {
 
             this.setState({
@@ -126,9 +123,6 @@ describe('Test - ??', function() {
             _.extend(options, {needsAuthentication: true});
         }
 
-        // console.log('$$$$$ options: ', JSON.stringify(options));
-
-        // console.log('===>>> Object.getOwnPropertyNames(options).length: ', Object.getOwnPropertyNames(options).length);
         if (Object.getOwnPropertyNames(options).length !== 0) {
             unitTest = unitTest + ',\n' + JSON.stringify(options, null, 4);
         }

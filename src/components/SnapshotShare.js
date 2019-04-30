@@ -56,31 +56,3 @@ export class SnapshotShare extends React.Component {
         );
     }
 }
-
-//<Button bsStyle="primary">CopyToClipboard</Button>
-/*
-
-
-<label>
-{url}
-</label>
- <input style={minWidth: '100'} type="text" value={url}/>
-*/
-/*
-<div className="static-modal" style={modalStyle}>
-
-      <Modal.Dialog>
-        <Modal.Header>
-          <Modal.Title>Snapshot URL </Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body> {url} </Modal.Body>
-
-        <Modal.Footer>
-          <Button onClick={() => this.props.onClose()} >Close</Button>
-
-        </Modal.Footer>
-      </Modal.Dialog>
-</div>
-
-*/

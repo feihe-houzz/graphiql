@@ -178,7 +178,6 @@ export class ThriftConverter extends React.Component {
     }
 
     _constructGraphQLEnum(data) {
-       // console.log('===>>> data: ', data);
        var schema = '';
        var resolver='';
 
@@ -208,53 +207,44 @@ export class ThriftConverter extends React.Component {
     }
 
     convert() {
-
-        // var extracted = this._extract(this.state.thriftInput);
         var extracted = null;
         var data = this.state.thriftInput;
         // start with struct
         var isStruct = (data.trim().match(/struct/g) || []).length > 0;
         var isEnum = (data.trim().match(/enum/g) || []).length > 0;
 
-        console.log('=====: isStruct: ', isStruct);
-        console.log('<<<<<: isEnum: ', isEnum);
         var covertorOutput = '';
-        console.log('====>>> data: ', data);
         if (isStruct && isEnum) {
             covertorOutput = 'The struct and enum cannot be mixed';
         } else if (isStruct) {
             let structCount = (data.match(/struct/g) || []).length;
-            console.log('===>>> structCount: ', structCount);
+            
             if (structCount === 0) {
                 covertorOutput = 'Neither struct nor enum';
             } else if (structCount === 1) {
                 // normal extract
-                console.log('===>>> structCount: ', structCount);
                 let extracted = this._extractStruct(data);
                 covertorOutput = this._constructGraphQL(extracted, isStruct);
             } else {
                 // structCount > 1
                 let structStrArr = data.split('struct');
-                console.log('===>>> structCount: ', structCount);
-                console.log('--->>> structStrArr: ', structStrArr);
                 structStrArr = structStrArr.map(elem=> {
                     if (elem && elem.includes('{')) {
                         elem = 'struct ' + elem;
                         return elem;
                     }
                 });
-                console.log('<<<>>>: ', structStrArr);
 
                 let extractedArr = structStrArr.map(elem => {
                     if (elem) {
                         return this._extractStruct(elem);
                     }
                 });
-                console.log('@@@@@@: ', extractedArr);
+                
                 let convertedOutputArr = extractedArr.map(elem => {
                     return this._constructGraphQL(elem, isStruct);
                 });
-                console.log('!!!!!!!!: ', extractedArr);
+                
                 convertedOutputArr.forEach(elem => {
                     if (elem) {
                         covertorOutput += elem + '\n\n';
@@ -263,37 +253,30 @@ export class ThriftConverter extends React.Component {
             }
         } else if (isEnum) {
             let enumCount = (data.match(/enum/g) || []).length;
-            console.log('===>>> enumCount: ', enumCount);
+            
             if (enumCount === 0) {
                 covertorOutput = 'Neither struct nor enum';
             } else if (enumCount === 1) {
                 // normal extract
-                console.log('===>>> enumCount: ', enumCount);
                 let extracted = this._extractEnum(data);
                 covertorOutput = this._constructGraphQL(extracted, isStruct);
             } else {
                 // enumCount > 1
                 let enumStrArr = data.split('enum');
-                console.log('===>>> enumCount: ', enumCount);
-                console.log('--->>> enumStrArr: ', enumStrArr);
                 enumStrArr = enumStrArr.map(elem=> {
                     if (elem && elem.includes('{')) {
                         elem = 'enum ' + elem;
                         return elem;
                     }
                 });
-                console.log('<<<>>>: ', enumStrArr);
-
                 let extractedArr = enumStrArr.map(elem => {
                     if (elem) {
                         return this._extractEnum(elem);
                     }
                 });
-                console.log('@@@@@@: ', extractedArr);
                 let convertedOutputArr = extractedArr.map(elem => {
                     return this._constructGraphQL(elem, isStruct);
                 });
-                console.log('!!!!!!!!: ', extractedArr);
                 convertedOutputArr.forEach(elem => {
                     if (elem) {
                         covertorOutput += elem + '\n\n';
