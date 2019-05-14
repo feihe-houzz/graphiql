@@ -167,12 +167,16 @@ export class Mobile extends React.Component {
 
         let host = apiHelper.getHost();
         let curPassword = '';
-        if (host.includes('houzz.com') && !host.includes('stghouzz.com')) {
+        if (this.state.password) { // passward is set
             curPassword = this.state.password;
         } else {
-            curPassword = 'eciaa@285';
+            if (!host.includes('houzz.com')) {
+                curPassword = 'eciaa@285';
+            }
         }
 
+        console.log('>>>>>>: ', curPassword);
+        
         let userName = JSON.stringify(user);
         let password = JSON.stringify(curPassword);
         let appName = JSON.stringify(app);
