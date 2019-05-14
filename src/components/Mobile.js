@@ -174,8 +174,6 @@ export class Mobile extends React.Component {
                 curPassword = 'eciaa@285';
             }
         }
-
-        console.log('>>>>>>: ', curPassword);
         
         let userName = JSON.stringify(user);
         let password = JSON.stringify(curPassword);
