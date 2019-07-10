@@ -18,7 +18,7 @@ export class UnitTestAutoGen extends React.Component {
       response: PropTypes.string,
       mobileMode: PropTypes.bool,
       onRunQuery: PropTypes.func,
-    }
+    };
 
     constructor(props) {
         super(props);
@@ -35,7 +35,7 @@ export class UnitTestAutoGen extends React.Component {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-        
+
         this.setState({
             [name]: value
         });
@@ -83,7 +83,7 @@ describe('Test - ??', function() {
               this.props.onRunQuery();
             }
         }
-        
+
         if (!this.props.response) {
 
             this.setState({
@@ -112,7 +112,9 @@ describe('Test - ??', function() {
         let unitTest = JSON.stringify(curReq, null, 4) + ',\n' + JSON.stringify(curRes, null, 4);
         let curUnitTest = this.composeQueryStr(curReq) + ',\n' + JSON.stringify(curRes, null, 4);
         unitTest = curUnitTest;
-        let options = {};
+        let options = {
+            owner: "your email@houzz.com"
+        };
 
 
         if (this.props.mobileMode) {
