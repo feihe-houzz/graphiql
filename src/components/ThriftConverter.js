@@ -31,13 +31,20 @@ export class ThriftConverter extends React.Component {
         const rx = /\d+\s*:\s*(\w+)\s+(.+)\s+(\w+)\s*(,|\/)?/g;
         var arr = rx.exec(data);
 
-        if (arr == null || arr.length < 4) {
+        if (arr == null || arr.length < 3) {
             return null;
         }
 
+        if (arr[1] === 'optional') {
+            return {
+                type: arr[2],
+                name: arr[3]
+            }
+        }
+
         return {
-            type: arr[2],
-            name: arr[3]
+            type: arr[1],
+            name: arr[2]
         }
     }
 
@@ -218,7 +225,7 @@ export class ThriftConverter extends React.Component {
             covertorOutput = 'The struct and enum cannot be mixed';
         } else if (isStruct) {
             let structCount = (data.match(/struct/g) || []).length;
-            
+
             if (structCount === 0) {
                 covertorOutput = 'Neither struct nor enum';
             } else if (structCount === 1) {
@@ -240,11 +247,11 @@ export class ThriftConverter extends React.Component {
                         return this._extractStruct(elem);
                     }
                 });
-                
+
                 let convertedOutputArr = extractedArr.map(elem => {
                     return this._constructGraphQL(elem, isStruct);
                 });
-                
+
                 convertedOutputArr.forEach(elem => {
                     if (elem) {
                         covertorOutput += elem + '\n\n';
@@ -253,7 +260,7 @@ export class ThriftConverter extends React.Component {
             }
         } else if (isEnum) {
             let enumCount = (data.match(/enum/g) || []).length;
-            
+
             if (enumCount === 0) {
                 covertorOutput = 'Neither struct nor enum';
             } else if (enumCount === 1) {
