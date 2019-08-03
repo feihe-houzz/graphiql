@@ -28,7 +28,7 @@ export class ThriftConverter extends React.Component {
     }
 
     _extractField(data) {
-        const rx = /\d+\s*:\s*(\w+)\s+(.+)\s+(\w+)\s*(,|\/)?/g;
+        var rx = /\d+\s*:\s*(\w+)\s+(\w+)(,|\s+)(\w*)\s*(,|\/)?/g;
         var arr = rx.exec(data);
 
         if (arr == null || arr.length < 3) {
@@ -38,7 +38,7 @@ export class ThriftConverter extends React.Component {
         if (arr[1] === 'optional') {
             return {
                 type: arr[2],
-                name: arr[3]
+                name: arr[4]
             }
         }
 
