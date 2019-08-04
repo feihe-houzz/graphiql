@@ -28,23 +28,43 @@ export class ThriftConverter extends React.Component {
     }
 
     _extractField(data) {
-        var rx = /\d+\s*:\s*(\w+)\s+(\w+)(,|\s+)(\w*)\s*(,|\/)?/g;
-        var arr = rx.exec(data);
-
-        if (arr == null || arr.length < 3) {
-            return null;
-        }
-
-        if (arr[1] === 'optional') {
-            return {
-                type: arr[2],
-                name: arr[4]
+        let indexColon = data.indexOf(':');
+        let content = data.substring(indexColon + 1).trim();
+        let arr = [];
+        let builder = '';
+        let bracketCount = 0;
+        for (let i = 0; i < content.length; i++) {
+            if (i === content.length ||
+              (bracketCount === 0 && (content[i] === ' ' || content[i] === ','))) {
+                arr.push(builder);
+                builder = '';
+            }
+            else {
+                builder += content[i];
+                if (content[i] === '<') {
+                    bracketCount++;
+                }
+                else if (content[i] === '>') {
+                    bracketCount--;
+                }
             }
         }
 
-        return {
-            type: arr[1],
-            name: arr[2]
+        if (arr.length < 2) {
+            return null;
+        }
+        if (arr.length === 2) {
+            return {
+                type: arr[0],
+                name: arr[1]
+            }
+        }
+
+        else {
+            return {
+                type: arr[1],
+                name: arr[2]
+            }
         }
     }
 
