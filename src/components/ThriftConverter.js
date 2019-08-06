@@ -59,18 +59,19 @@ export class ThriftConverter extends React.Component {
         }
         if (arr.length === 2) {
             return {
-                type: arr[0],
-                name: arr[1]
+                type: arr[0].trim(),
+                name: arr[1].trim()
             }
         }
 
         else {
             if (arr[0] === 'required') {
+                arr[1].trim();
                 arr[1] += '!';
             }
             return {
-                type: arr[1],
-                name: arr[2]
+                type: arr[1].trim(),
+                name: arr[2].trim()
             }
         }
     }
