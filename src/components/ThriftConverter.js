@@ -35,6 +35,9 @@ export class ThriftConverter extends React.Component {
         let bracketCount = 0;
         for (let i = 0; i < content.length; i++) {
             if (bracketCount === 0 && (content[i] === ' ' || content[i] === ',' || content[i] === ';')) {
+                if (builder.length === 0) {
+                    continue;
+                }
                 arr.push(builder);
                 builder = '';
             }
@@ -48,7 +51,7 @@ export class ThriftConverter extends React.Component {
                 }
             }
         }
-        if (bracketCount != 0) {
+        if (bracketCount !== 0) {
             return null;
         }
         if (builder.length > 0) {
@@ -59,19 +62,18 @@ export class ThriftConverter extends React.Component {
         }
         if (arr.length === 2) {
             return {
-                type: arr[0].trim(),
-                name: arr[1].trim()
+                type: arr[0],
+                name: arr[1]
             }
         }
 
         else {
             if (arr[0] === 'required') {
-                arr[1].trim();
                 arr[1] += '!';
             }
             return {
-                type: arr[1].trim(),
-                name: arr[2].trim()
+                type: arr[1],
+                name: arr[2]
             }
         }
     }
