@@ -34,8 +34,7 @@ export class ThriftConverter extends React.Component {
         let builder = '';
         let bracketCount = 0;
         for (let i = 0; i < content.length; i++) {
-            if (i === content.length ||
-              (bracketCount === 0 && (content[i] === ' ' || content[i] === ','))) {
+            if (bracketCount === 0 && (content[i] === ' ' || content[i] === ',' || content[i] === ';')) {
                 arr.push(builder);
                 builder = '';
             }
@@ -49,7 +48,12 @@ export class ThriftConverter extends React.Component {
                 }
             }
         }
-
+        if (bracketCount != 0) {
+            return null;
+        }
+        if (builder.length > 0) {
+            arr.push(builder);
+        }
         if (arr.length < 2) {
             return null;
         }
@@ -61,6 +65,9 @@ export class ThriftConverter extends React.Component {
         }
 
         else {
+            if (arr[0] === 'required') {
+                arr[1] += '!';
+            }
             return {
                 type: arr[1],
                 name: arr[2]
@@ -165,6 +172,11 @@ export class ThriftConverter extends React.Component {
 
     // convert thrift type into graphQL type
     _convertType(data) {
+        var isRequired = false;
+        if (data[data.length - 1] === '!') {
+            isRequired = true;
+            data = data.substring(0, data.length - 1);
+        }
         var type = null;
         // list<...>
         var isList = data.match(/^list/gi);
@@ -186,6 +198,9 @@ export class ThriftConverter extends React.Component {
                 case 'double': type = 'Float'; break;
                 default: type = 'Unknown'; break;
             }
+        }
+        if (isRequired) {
+            type += '!';
         }
         return type;
     }
